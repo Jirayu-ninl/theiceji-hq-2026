@@ -1,0 +1,111 @@
+/* Publish (/p/<slug>/publish) — a table of posts (or accounts) beside an inspector that plans, clears and records a post.
+   Instrument: the age ruler — views at 1h · 24h · 72h · 7d along
+   an LCD line, lit / dashed / dim, with the post's age now as the amber playhead. */
+@scope (html) to (.legacy) {
+	.pubp { --insp-w: min(var(--size-insp-publish, 420px), 50vw); grid-template-columns: minmax(0, 1fr) var(--insp-w); grid-template-areas: "main insp"; }
+	.pubp .pub-pane { grid-area: main; }
+	.pubp .pane-head .hud-label { flex: none; }
+	.pubp .pane-head .dim { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+	/* tables */
+	.pubp .post-tbl { --cols: minmax(0, 0.85fr) minmax(0, 1.3fr) 166px 92px 118px minmax(0, 0.8fr); }
+	.pubp .acct-tbl { --cols: 88px minmax(0, 1fr) minmax(0, 1fr) 64px 80px; }
+	.pubp .tbl .plat { font: 500 10.5px var(--mono); color: var(--ink-3); margin-right: 7px; }
+	.pubp .tbl .when, .pubp .tbl .file { font: 500 11px var(--mono); color: var(--ink-3); }
+	.pubp .post-tbl .num { font-size: 11.5px; }
+	.pubp .post-tbl .num.dim { font-size: 10.5px; color: var(--ink-3); }
+	.pubp .acct-tbl .tbl-row.arch > * { color: var(--ink-4); }
+	.pubp .state-word.problem { color: var(--accent); }
+	.pubp .state-word.off { color: var(--ink-4); }
+	.pubp .state-word .glyph { font-size: 10px; }
+
+	/* readouts over the posts table */
+	.pubp .pub-read { flex: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; }
+	.pubp .pub-read .readout { min-width: 210px; }
+	.pubp .pub-read .readout .big { font: 500 20px/1.1 var(--mono); white-space: nowrap; }
+	.pubp .pub-read .readout .big.dim { color: var(--lcd-dim); font-size: 14px; line-height: 22px; }
+	.pubp .pub-read .u, .pubp .dev-read .readout .u { font: 500 11px var(--mono); color: var(--lcd-dim); }
+	.pubp .pub-read + .pane-body { border-top: 1px solid var(--line); }
+
+	/* the instrument: age ruler */
+	.pubp .ruler { background: var(--lcd); background-image: var(--scan); border-radius: var(--r2); box-shadow: inset 0 0 0 1px var(--lcd-line); padding: 8px 10px 6px; color: var(--lcd-ink); font: 500 11px/1.3 var(--mono); }
+	.pubp .ruler-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+	.pubp .ruler-h .hud-label { color: var(--lcd-dim); flex: none; }
+	.pubp .ruler-h .now { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10.5px; color: var(--lcd-accent); }
+	.pubp .ruler-h .now.off { color: var(--lcd-dim); }
+	.pubp .ruler-body { position: relative; height: 62px; margin: 4px 6px 0; }
+	.pubp .ruler .line { position: absolute; left: 0; right: 0; top: 33px; border-top: 1px dashed var(--lcd-line); }
+	.pubp .ruler .past { position: absolute; left: 0; top: 33px; width: var(--x); height: 1px; background: var(--lcd-dim); }
+	.pubp .ruler .rd { position: absolute; left: var(--x); top: 31px; width: 1px; height: 5px; background: var(--lcd-dim); }
+	.pubp .ruler .mk { position: absolute; left: var(--x); top: 0; bottom: 0; width: 0; }
+	.pubp .ruler .mk b { position: absolute; bottom: 36px; left: 0; transform: translateX(-50%); width: max-content; max-width: 88px; text-align: center; font: 500 15px/1.1 var(--mono); color: var(--lcd-ink); }
+	.pubp .ruler .mk:not(.lit) b { font-size: 10.5px; line-height: 1.25; color: var(--lcd-dim); }
+	.pubp .ruler .mk .tk { position: absolute; top: 27px; left: -1px; width: 2px; height: 13px; background: var(--lcd-ink); }
+	.pubp .ruler .mk.gap .tk { left: 0; width: 0; background: none; border-left: 1px dashed var(--lcd-dim); }
+	.pubp .ruler .mk.soon .tk, .pubp .ruler .mk.off .tk { left: 0; top: 29px; width: 1px; height: 9px; background: var(--lcd-line); }
+	.pubp .ruler .mk span { position: absolute; bottom: 0; left: 0; transform: translateX(-50%); white-space: nowrap; font-size: 10px; letter-spacing: 0.04em; color: var(--lcd-dim); }
+	.pubp .ruler .head { position: absolute; left: var(--x); top: 24px; width: 2px; height: 19px; margin-left: -1px; border-radius: 1px; background: var(--lcd-accent); box-shadow: 0 0 6px var(--lcd-accent); }
+	.pubp .ruler .cut { position: absolute; left: var(--x); top: 25px; height: 17px; border-left: 1px dashed var(--lcd-dim); }
+
+	/* inspector */
+	.pubp .facts dd { overflow-wrap: anywhere; }
+	.pubp .quote.cap > span:last-child { white-space: pre-line; }
+	.pubp .disc { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+	.pubp .blockers { display: grid; gap: 4px; margin: 0; padding: 7px 10px; border-radius: var(--r2); background: color-mix(in srgb, var(--accent) 9%, transparent); font-size: 12px; color: var(--ink-2); }
+	.pubp .blockers ul { display: grid; gap: 3px; margin: 0; padding: 0; list-style: none; }
+	.pubp .blockers li { display: grid; grid-template-columns: 10px minmax(0, 1fr); gap: 7px; align-items: baseline; }
+	.pubp .blockers .btn { justify-self: start; margin-top: 2px; }
+	.pubp .changed { margin: 0; padding: 7px 10px; border: 1px dashed var(--line-2); border-radius: var(--r2); font-size: 12px; color: var(--ink-2); }
+	.pubp .live-line { display: flex; align-items: center; gap: 2px; margin: 0; font: 500 11.5px var(--mono); color: var(--live); }
+	.pubp .rd-wrap { display: grid; gap: 6px; }
+	.pubp .rd-tbl { --cols: 86px minmax(0, 0.75fr) minmax(0, 1.45fr) minmax(0, 0.95fr); border: 1px solid var(--line); border-radius: var(--r3); overflow: hidden; }
+	.pubp .rd-tbl .tbl-head { position: static; }
+	.pubp .rd-tbl .tbl-row { min-height: 28px; padding-top: 4px; padding-bottom: 4px; font-size: 12px; }
+	.pubp .rd-tbl .tbl-row:last-child { border-bottom: 0; }
+	.pubp .rd-tbl .tbl-row:hover { background: transparent; }
+	.pubp .rd-tbl .tbl-row > * { white-space: normal; overflow-wrap: break-word; }
+	.pubp .rd-tbl .mono { font: 500 11px var(--mono); }
+	.pubp .rd-tbl small { font: 500 10px var(--mono); color: var(--ink-3); }
+	.pubp .rd-tbl .fix { display: block; }
+	.pubp .rd-tbl s { color: var(--ink-4); }
+	.pubp .rd-tbl .src { font: 500 10.5px var(--mono); color: var(--ink-3); }
+	.pubp .rd-tbl .fixw { color: var(--ink-2); }
+
+	/* forms: textarea, the file picker, disclosure switches */
+	.pubp .fcard textarea { font: 500 12px/1.45 var(--ui); color: var(--ink); text-transform: none; letter-spacing: 0; resize: vertical; min-height: 58px; }
+	.pubp .fcard .row .grow { flex: 1 1 110px; }
+	.pubp .picker { display: grid; gap: 3px; }
+	.pubp .picker .pk { display: flex; align-items: baseline; gap: 8px; min-width: 0; padding: 5px 8px; border: 1px solid var(--line); border-radius: var(--r2); text-align: left; color: var(--ink-2); }
+	.pubp .picker .pk:hover { background: var(--raise); }
+	.pubp .picker .pk[aria-checked="true"] { background: var(--raise); color: var(--ink); box-shadow: inset 0 0 0 1px var(--accent); }
+	.pubp .picker .pk .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 11.5px var(--mono); }
+	.pubp .picker .pk .v { font: 500 10.5px var(--mono); color: var(--ink-3); white-space: nowrap; }
+	.pubp .pub-sw { display: grid; gap: 6px; }
+	.pubp .pub-sw .srow { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink); }
+	.pubp .pub-sw .sub { margin-left: auto; font: 500 11px var(--mono); color: var(--ink-3); }
+
+	/* the inspector takes 420px beside the table until 1100, then becomes a sheet and the table gets the width back */
+	@media (min-width: 1101px) and (max-width: 1300px) {
+		.pubp .post-tbl { --cols: minmax(0, 0.8fr) minmax(0, 1.4fr) 166px 92px 118px; }
+		.pubp .post-tbl .c-file { display: none; }
+	}
+	@media (min-width: 1101px) and (max-width: 1200px) {
+		.pubp .post-tbl { --cols: minmax(0, 0.6fr) minmax(0, 1.4fr) 166px 118px; }
+		.pubp .post-tbl .c-when, .pubp .post-tbl .hdl { display: none; }
+	}
+	@media (max-width: 1100px) { .pubp { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; } }
+	@media (max-width: 900px) {
+		.pubp .post-tbl { --cols: minmax(0, 0.8fr) minmax(0, 1.4fr) 166px 92px 118px; }
+		.pubp .post-tbl .c-file { display: none; }
+	}
+	@media (max-width: 720px) {
+		.pubp .post-tbl { --cols: 58px minmax(0, 1fr) minmax(0, 1.15fr); }
+		.pubp .post-tbl .c-hide, .pubp .post-tbl .hdl { display: none; }
+		.pubp .acct-tbl { --cols: 72px minmax(0, 1fr) minmax(0, 0.8fr); }
+		.pubp .acct-tbl .c-hide { display: none; }
+		.pubp .pub-read .readout { min-width: 0; flex: 1 1 150px; }
+	}
+	/* app additions */
+	.pubp .confirm { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+	.pubp .confirm .q { font-size: 11.5px; color: var(--ink-2); }
+}

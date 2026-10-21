@@ -1,0 +1,38 @@
+# Docker build context for apps/hq-mcp/Dockerfile (build context: repo root).
+#
+# `turbo prune` needs every workspace's package.json (it parses the whole graph)
+# plus bun.lock, turbo.json and the source of the workspaces the pruned server
+# depends on — never installed deps, build output, secrets or the Next app's
+# source. The prune drops whatever the server doesn't reach, so the image
+# stays lean.
+
+**/node_modules
+.git
+.turbo
+**/.turbo
+**/.next
+**/dist
+**/out
+**/coverage
+**/*.log
+**/*.tsbuildinfo
+
+# Secrets never enter an image.
+**/.env
+**/.env.*
+!**/.env.example
+
+# Apps the MCP server doesn't depend on: keep only their manifests for the
+# workspace graph.
+apps/hq/**
+!apps/hq/package.json
+apps/worker/**
+!apps/worker/package.json
+
+# Never part of an image.
+docs
+.claude
+.railway
+.vscode
+.github
+.mcp.json

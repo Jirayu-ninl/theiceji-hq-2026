@@ -1,0 +1,80 @@
+/* Clients (/clients) — Table + Inspector (400), in
+   the Projects page's grammar. A client is HQ-wide — one record Board cards and Quotes both point at.
+   Signature instrument = the ledger strip: one LCD per client with what was paid this year, what is awaiting payment and what
+   is on the board, as one bar on one scale — paid lit, awaiting as unlit segments under a dashed cap (pending money is never
+   a lit bar), on the board as a dashed outline (not money yet). Everything else is plain SaaS. Layout only; every colour is
+   a token from globals.css. Every rule sits under .clientsp, so nothing here reaches another page. */
+@scope (html) to (.legacy) {
+	.clientsp { --insp-w: min(var(--size-insp-clients, 400px), 50vw); grid-template-columns: minmax(0, 1fr) var(--insp-w); grid-template-areas: "main insp"; }
+	.clientsp .list-pane { grid-area: main; }
+	.clientsp .list-pane .pane-body { display: flex; flex-direction: column; }
+	.clientsp .client-tbl { --cols: minmax(0, 1.6fr) 90px 64px 110px 110px 110px; }
+	.clientsp .client-tbl .nm { display: grid; min-width: 0; }
+	.clientsp .client-tbl .nm .n1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.clientsp .client-tbl .nm .n2 { font: 500 10.5px var(--mono); color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.clientsp .client-tbl .dots { display: inline-flex; gap: 4px; align-items: center; }
+	.clientsp .client-tbl .dots .dim { color: var(--ink-4); }
+	.clientsp .client-tbl .num.accent { color: var(--accent); }
+	.clientsp .client-tbl .num.dim { color: var(--ink-4); }
+	.clientsp .client-tbl .tbl-row { height: auto; min-height: 36px; padding-block: 4px; }
+	.clientsp .client-tbl .once-head { padding: 10px 10px 4px; }
+	.clientsp .once-row .nm .n1 { color: var(--ink-2); }
+	.clientsp .once-row .act { justify-self: end; overflow: visible; }
+	.clientsp .client-read { flex: none; display: flex; gap: 8px; padding: 10px 10px 0; }
+	.clientsp .client-read .readout { min-width: 220px; }
+	.clientsp .client-read .readout .big { font: 500 20px/1.1 var(--mono); }
+
+	/* the instrument: ledger strip */
+	.clientsp .ledger { background: var(--lcd); background-image: var(--scan); border-radius: var(--r2); box-shadow: inset 0 0 0 1px var(--lcd-line); padding: 8px 10px 9px; color: var(--lcd-ink); font: 500 12px/1.5 var(--mono); display: grid; gap: 6px; }
+	.clientsp .ledger .bar { position: relative; display: flex; height: 10px; gap: 2px; }
+	.clientsp .ledger .bar > i { display: block; height: 100%; min-width: 2px; border-radius: 1px; }
+	.clientsp .ledger .bar .paid { background: var(--lcd-ink); }
+	.clientsp .ledger .bar .owed { background: repeating-linear-gradient(90deg, var(--lcd-line) 0 5px, transparent 5px 7px); box-shadow: inset 0 -2px 0 -1px var(--lcd-accent); border-top: 1px dashed var(--lcd-accent); }
+	.clientsp .ledger .bar .board { border: 1px dashed var(--lcd-dim); }
+	.clientsp .ledger .ln { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto auto; gap: 8px; align-items: baseline; color: var(--lcd-dim); }
+	.clientsp .ledger .ln b { font-weight: 500; color: var(--lcd-ink); text-align: right; }
+	.clientsp .ledger .ln .k { width: 10px; height: 8px; align-self: center; border-radius: 1px; }
+	.clientsp .ledger .ln .k.paid { background: var(--lcd-ink); }
+	.clientsp .ledger .ln .k.owed { border-top: 1px dashed var(--lcd-accent); background: repeating-linear-gradient(90deg, var(--lcd-line) 0 3px, transparent 3px 4px); }
+	.clientsp .ledger .ln .k.board { border: 1px dashed var(--lcd-dim); }
+	.clientsp .ledger .ln.owed b { color: var(--lcd-accent); }
+	.clientsp .ledger .ln .n { font-size: 10.5px; }
+	.clientsp .ledger .rule { border-top: 1px dashed var(--lcd-line); }
+	.clientsp .ledger .ledger-note { font-size: 10.5px; color: var(--lcd-dim); }
+
+	/* the client's cards: one row per card, the card's colour as its stripe, total on the right */
+	.clientsp .crow { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; padding: 6px 8px 6px 11px; border: 1px solid var(--line); border-radius: var(--r2); color: var(--ink); min-width: 0; }
+	.clientsp a.crow:hover { background: var(--raise); }
+	.clientsp .crow[data-color]::after { content: ""; position: absolute; inset-block: -1px; inset-inline-start: -1px; width: 3px; border-radius: var(--r2) 0 0 var(--r2); background: var(--card); pointer-events: none; }
+	:scope[data-theme="light"] .clientsp .crow[data-color]::after { background: color-mix(in srgb, var(--card) 62%, #000); }
+	@media (prefers-color-scheme: light) {
+		:scope:not([data-theme="dark"]) .clientsp .crow[data-color]::after { background: color-mix(in srgb, var(--card) 62%, #000); }
+	}
+	.clientsp .crow .t { font-size: 12.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.clientsp .crow .v { font: 500 11.5px var(--mono); color: var(--ink-2); text-align: right; }
+	.clientsp .crow .m { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; font: 500 10.5px var(--mono); color: var(--ink-3); min-width: 0; white-space: nowrap; overflow: hidden; }
+	.clientsp .crow .m .tag { font-size: 10.5px; }
+	.clientsp .crow .fu-n { display: inline-flex; align-items: center; gap: 2px; }
+	.clientsp .crow svg.fu-i { width: 11px; height: 11px; stroke-width: 2; }
+	.clientsp .crow.paid .t, .clientsp .crow.paid .v { color: var(--ink-2); }
+	.clientsp .crows { display: grid; gap: 4px; }
+	.clientsp .cgroup { display: grid; gap: 4px; }
+	.clientsp .cgroup + .cgroup { margin-top: 6px; }
+	.clientsp .cgroup .hud-label { display: flex; justify-content: space-between; }
+
+	.clientsp .inspector .dev-acts .btn[disabled] { opacity: 0.35; }
+	/* Delete can't go: why, in words, where the button would be. */
+	.clientsp .inspector .dev-acts .cant { flex-basis: 100%; font-size: 11px; color: var(--ink-3); }
+	.clientsp .fcard textarea { font: 12.5px/1.5 var(--ui); color: var(--ink); resize: vertical; min-height: 56px; text-transform: none; letter-spacing: 0; }
+	.clientsp .fcard input.mono { font-family: var(--mono); }
+	/* Thai never tracked or set in mono, even inside a HUD label or a fact */
+	.clientsp .hud-label :lang(th) { font-family: var(--ui); letter-spacing: 0; text-transform: none; }
+	.clientsp .facts dd :lang(th), .clientsp .facts dd:lang(th) { font-family: var(--ui); }
+
+	@media (max-width: 1100px) { .clientsp { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; } }
+	@media (max-width: 720px) {
+		.clientsp .client-tbl { --cols: minmax(0, 1fr) 96px; }
+		.clientsp .client-tbl .c-hide { display: none; }
+		.clientsp .client-read .readout { flex: 1; min-width: 0; }
+	}
+}

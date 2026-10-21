@@ -1,0 +1,57 @@
+/* Notes (/notes) — a pool (Board) or table (List) of parked thoughts beside an inspector that promotes them.
+   Plain on purpose: no instrument. */
+@scope (html) to (.legacy) {
+	.notesp { --insp-w: min(var(--size-insp-notes, 340px), 50vw); grid-template-columns: minmax(0, 1fr) var(--insp-w); grid-template-areas: "main insp"; }
+	.notes-pane { grid-area: main; }
+	.notes-pane .capture { display: flex; align-items: center; gap: 2px; margin: 0; flex: 1; min-width: 200px; background: var(--well); border: 1px solid var(--line-2); border-radius: var(--r2); padding-right: 2px; }
+	.notes-pane .capture input { flex: 1; min-width: 0; background: transparent; border: 0; padding: 0 8px; height: 24px; font-size: 12px; }
+	.notes-pane .capture button { width: 22px; height: 22px; padding: 0; color: var(--ink-3); font-size: 14px; line-height: 1; border-radius: var(--r1); }
+	.notes-pane .capture button:hover { color: var(--ink); background: var(--raise); }
+	.notes-pane .who-filter { display: inline-flex; gap: 2px; padding: 2px; background: var(--well); border: 1px solid var(--line); border-radius: var(--r2); flex-wrap: wrap; }
+	.notes-pane .who-filter button { height: 20px; padding: 0 8px; font: 500 11px var(--ui); color: var(--ink-3); border-radius: 3px; display: inline-flex; align-items: center; gap: 5px; }
+	.notes-pane .who-filter button:hover { color: var(--ink); background: var(--raise); }
+	.notes-pane .who-filter button[aria-pressed="true"] { color: var(--ink); background: var(--raise-2); }
+	.notes-pane .pool { --pool-min: 220px; }
+
+	/* cards */
+	.ncard { display: grid; align-content: start; gap: 8px; padding: 10px 12px; background: color-mix(in srgb, var(--project, var(--ink-3)) 8%, var(--panel)); cursor: pointer; }
+	.ncard .who { display: flex; align-items: center; justify-content: space-between; gap: 8px; font: 500 10.5px var(--mono); color: var(--ink-3); }
+	.ncard .who .tag { font: 500 11px var(--ui); }
+	/* the title on its own line, the body under it as markdown (every typed line kept, NotesPage `keepLines`) */
+	.ncard .t { font-size: 12.5px; font-weight: 600; line-height: 1.4; white-space: normal; overflow-wrap: anywhere; }
+	.ncard .t + .md { margin-top: -4px; }
+	.ncard .md { line-height: 1.5; overflow-wrap: anywhere; }
+	.ncard .md p, .ncard .md ul, .ncard .md ol, .ncard .md blockquote, .ncard .md pre { margin-bottom: 4px; }
+	.ncard .md h1, .ncard .md h2, .ncard .md h3 { margin: 4px 0; }
+	.ncard .md > :last-child { margin-bottom: 0; }
+	.ncard .to { font: 500 10.5px var(--mono); color: var(--accent); display: flex; align-items: center; gap: 6px; }
+	.ncard.promoted { opacity: 0.55; }
+	.notes-pane .pcard.ghost { min-height: 96px; }
+
+	/* list */
+	.notes-pane .tbl { --cols: minmax(0, 1fr) 140px 90px 130px; }
+	.notes-pane .tbl-row .txt { white-space: normal; line-height: 1.4; overflow-wrap: anywhere; }
+	.notes-pane .tbl-row.promoted { opacity: 0.55; }
+	.notes-pane .tbl-row .to { font: 500 10.5px var(--mono); color: var(--accent); }
+
+	/* inspector */
+	.notesp .inspector .note-text { font: 500 13.5px/1.5 var(--ui); white-space: normal; overflow-wrap: anywhere; }
+	.notesp .inspector .md p:not(:last-child) { margin-bottom: 4px; }
+	.notesp .inspector .labels { display: flex; flex-wrap: wrap; gap: 4px; }
+	.notesp .inspector textarea { width: 100%; min-height: 140px; resize: vertical; font: 400 12.5px/1.5 var(--ui); color: var(--ink); text-transform: none; letter-spacing: 0; }
+	.promote { display: grid; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: var(--r3); }
+	.promote label { display: grid; gap: 3px; font: 500 10px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+	.promote select { height: 26px; padding-block: 0; font: 500 12px var(--ui); text-transform: none; letter-spacing: 0; }
+	.promote .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+	.promote .hint { font-size: 11px; color: var(--ink-3); margin: 0; }
+
+	@media (max-width: 1100px) {
+		.notesp { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; }
+	}
+	@media (max-width: 640px) {
+		.notes-pane .pcard.ghost { min-height: 44px; }
+		.notes-pane .tbl { --cols: minmax(0, 1fr) 90px; }
+		.notes-pane .tbl-head > :nth-child(2), .notes-pane .tbl-head > :nth-child(3),
+		.notes-pane .tbl-row > :nth-child(2), .notes-pane .tbl-row > :nth-child(3) { display: none; }
+	}
+}

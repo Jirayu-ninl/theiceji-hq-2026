@@ -1,0 +1,28 @@
+{
+  "name": "theiceji-hq",
+  "private": true,
+  "version": "2026.10.21",
+  "description": "TheIceJi HQ — a personal command center: the app (apps/hq), its MCP server (apps/hq-mcp), the local worker (apps/worker) and the builtin agent runner (apps/agent-runner).",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "packageManager": "bun@1.3.14",
+  "overrides": {
+    "jsdom": "26.1.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "check": "turbo run check",
+    "verify": "turbo run verify",
+    "dev:hq": "turbo run dev --filter=hq",
+    "dev:hq-mcp": "bun run --cwd apps/hq-mcp mcp:dev",
+    "hq-mcp:stdio": "bun run apps/hq-mcp/src/stdio.ts"
+  },
+  "devDependencies": {
+    "railway": "^3.11.0",
+    "turbo": "^2.9.18"
+  }
+}

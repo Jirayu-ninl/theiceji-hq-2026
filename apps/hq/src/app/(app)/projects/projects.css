@@ -1,0 +1,24 @@
+/* Projects (/projects) — Table + Inspector.
+   A settings surface, plain SaaS: the only LCD is the selected project's readout. */
+@scope (html) to (.legacy) {
+	.projectsp { --insp-w: min(var(--size-insp-projects, 340px), 50vw); grid-template-columns: minmax(0, 1fr) var(--insp-w); grid-template-areas: "main insp"; }
+	.list-pane { grid-area: main; }
+	.proj-tbl { --cols: minmax(0, 1.6fr) 110px minmax(0, 1.4fr) 84px 60px; }
+	.proj-tbl .nm { display: flex; align-items: center; gap: 8px; min-width: 0; }
+	.proj-tbl .nm .slug { font: 500 10.5px var(--mono); color: var(--ink-3); }
+	.proj-tbl .glyphs { font-size: 12px; letter-spacing: 3px; color: var(--ink-3); }
+	.proj-tbl .num.wait { color: var(--wait); font-weight: 600; }
+	.mod-list { display: grid; gap: 1px; }
+	.mod-row { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 5px 2px; font-size: 12px; }
+	.mod-row .g { text-align: center; color: var(--ink-3); }
+	.mod-row .why-not { grid-column: 2 / -1; font-size: 11px; color: var(--ink-3); margin: -2px 0 2px; }
+	.mod-row.off .n { color: var(--ink-3); }
+	/* colour picker: .swatches lives in globals.css (Board's card colour uses it too) */
+	.fcard input[type="text"] { width: 100%; }
+	.notice-missing { padding: 7px 10px; font-size: 12px; color: var(--ink-2); border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+	.notice-missing a { text-decoration: underline; text-underline-offset: 2px; }
+	/* Archived and Trash say what they are in one quiet line. */
+	.projectsp .view-note { margin: 0; padding: 6px 10px; font-size: 11.5px; color: var(--ink-3); border-bottom: 1px solid var(--line); }
+	@media (max-width: 1100px) { .projectsp { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; } }
+	@media (max-width: 720px) { .proj-tbl { --cols: minmax(0, 1fr) 84px 44px; } .proj-tbl .c-hide { display: none; } }
+}

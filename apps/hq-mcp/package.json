@@ -1,0 +1,45 @@
+{
+  "name": "hq-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "TheIceJi HQ MCP server — HQ's projects × modules as MCP tools: hq, board, prompts, assets, story, calendar, quotes, publish, market, experiments, readings and the agents loop. Streamable HTTP on Railway, authorized by HQ's OAuth server (Claude, ChatGPT, Hermes Agent, …); stdio for local use.",
+  "scripts": {
+    "mcp:dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts",
+    "stdio": "bun run src/stdio.ts",
+    "test:http": "bun run test/http.ts",
+    "test:smoke": "bun run test/smoke.ts",
+    "test:hq": "bun run test/hq-stdio.ts && bun run test/hq-http.ts",
+    "test:agents": "bun run test/agents-acceptance.ts",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "lint": "biome check"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
+    "@theiceji/hq-agents": "workspace:*",
+    "@theiceji/hq-assets": "workspace:*",
+    "@theiceji/hq-board": "workspace:*",
+    "@theiceji/hq-calendar": "workspace:*",
+    "@theiceji/hq-core": "workspace:*",
+    "@theiceji/hq-db": "workspace:*",
+    "@theiceji/hq-experiments": "workspace:*",
+    "@theiceji/hq-market": "workspace:*",
+    "@theiceji/hq-ops": "workspace:*",
+    "@theiceji/hq-prompts": "workspace:*",
+    "@theiceji/hq-publish": "workspace:*",
+    "@theiceji/hq-quotes": "workspace:*",
+    "@theiceji/hq-readings": "workspace:*",
+    "@theiceji/hq-storage": "workspace:*",
+    "@theiceji/hq-story": "workspace:*",
+    "@theiceji/mcp-kernel": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.13",
+    "@modelcontextprotocol/client": "2.0.0",
+    "@types/bun": "^1.4.2",
+    "typescript": "^7.0.2"
+  }
+}

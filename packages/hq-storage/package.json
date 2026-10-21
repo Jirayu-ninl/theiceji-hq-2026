@@ -1,0 +1,26 @@
+{
+  "name": "@theiceji/hq-storage",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "HQ object storage — a StorageProvider interface over Cloudflare R2 (S3 API via aws4fetch) and the owner's Google Drive (Drive API v3 over fetch). Framework-free; shared by apps/hq, apps/hq-mcp and the worker.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./config": "./src/config.ts",
+    "./keys": "./src/keys.ts",
+    "./r2": "./src/r2.ts",
+    "./provider": "./src/provider.ts",
+    "./gdrive": "./src/providers/gdrive.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "bun test test"
+  },
+  "dependencies": {
+    "aws4fetch": "^1.0.20"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.1",
+    "typescript": "^7.0.2"
+  }
+}

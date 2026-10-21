@@ -1,0 +1,126 @@
+/* Project page (/p/<slug>) · Map — the kind's pipeline as a node map on a well, beside the inspector.
+   Instrument: the node map. Page layout and the map's
+   own parts only; tokens and shared parts live in app/globals.css. Everything sits under .pmap. */
+@scope (html) to (.legacy) {
+	.page.pmap { --insp-w: min(var(--size-insp-map, 340px), 50vw); grid-template-columns: minmax(0, 1fr) var(--insp-w); grid-template-areas: "main insp"; }
+
+	/* the well: pan by dragging; a container, so the first frame can fit before any script runs */
+	.pmap .canvas { grid-area: main; min-height: 0; cursor: grab; user-select: none; touch-action: none; container-type: size; }
+	.pmap .canvas.drag { cursor: grabbing; }
+	.pmap .canvas:focus-visible { outline: 2px solid var(--lcd-ink); outline-offset: -4px; }
+	.pmap .canvas :focus-visible { outline-color: var(--lcd-ink); }
+	.pmap.paused .world { opacity: 0.6; }
+
+	/* the world: 1:1 map units, scaled and moved as one. Until the browser measures the well,
+	   a container-query fit stands in (the script replaces it with the exact one). */
+	.pmap .world {
+		position: absolute; left: 0; top: 0; transform-origin: 0 0;
+		background: radial-gradient(circle, var(--lcd-line) 1px, transparent 1.4px) 0 0 / 24px 24px;
+		--s0: min(var(--sw, 1), var(--sh, 1));
+		transform: translate(calc(50cqw - var(--cx) * var(--s0)), calc(50cqh + 9px - var(--cy) * var(--s0))) scale(var(--s0));
+	}
+	@container (max-width: 1060px) { .pmap .world { --sw: 0.95; } }
+	@container (max-width: 960px) { .pmap .world { --sw: 0.88; } }
+	@container (max-width: 860px) { .pmap .world { --sw: 0.78; } }
+	@container (max-width: 760px) { .pmap .world { --sw: 0.68; } }
+	@container (max-height: 790px) { .pmap .world { --sh: 0.95; } }
+	@container (max-height: 720px) { .pmap .world { --sh: 0.85; } }
+	@container (max-height: 640px) { .pmap .world { --sh: 0.75; } }
+	@container (max-height: 560px) { .pmap .world { --sh: 0.65; } }
+	@container (max-width: 599px) { .pmap .world { transform: translate(calc(50cqw - var(--lx) * 0.7), calc(40px - var(--by) * 0.7)) scale(0.7); } }
+
+	/* edges: dashes flow while something moves along them; stop under reduced motion (globals) */
+	.pmap .edges { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+	.pmap .edges path { fill: none; stroke: var(--lcd-dim); stroke-width: 1.4; stroke-dasharray: 6 8; animation: pmap-flow 1.2s linear infinite; opacity: 0.85; }
+	.pmap .edges path.money { stroke: var(--lcd-accent); }
+	.pmap .edges path.wait { stroke: var(--lcd-wait); stroke-dasharray: none; animation: none; }
+	.pmap .edges path.plan { opacity: 0.35; animation: none; stroke-dasharray: 2 6; }
+	.pmap .edges text { font: 500 10px var(--mono); fill: var(--lcd-dim); letter-spacing: 0.04em; }
+	.pmap .edges text.wait { fill: var(--lcd-wait); }
+	.pmap .edges text.money { fill: var(--lcd-accent); }
+
+	/* nodes: one LCD readout each — real buttons; ↵ opens the node's page */
+	.pmap .nodes { position: absolute; inset: 0; display: block; }
+	.pmap .node { position: absolute; display: block; text-align: left; padding: 8px 10px 9px; border-radius: var(--r3); background: color-mix(in srgb, var(--lcd-ink) 6%, var(--lcd)); border: 1px solid var(--lcd-line); color: var(--lcd-ink); box-shadow: 0 1px 0 var(--viewer); cursor: pointer; }
+	.pmap .node:hover { border-color: var(--lcd-dim); }
+	.pmap .node:focus-visible { outline: 2px solid var(--lcd-ink); outline-offset: 2px; }
+	/* selected = the top-edge tick in the LCD's accent over a lifted face (a wash, so a lane node keeps its tint) */
+	.pmap .node.sel { box-shadow: 0 1px 0 var(--viewer), inset 0 0 0 100vmax color-mix(in srgb, var(--lcd-ink) 7%, transparent); }
+	.pmap .node.sel::before { content: ""; position: absolute; inset-block-start: -1px; inset-inline-start: 10px; width: 18px; height: 2px; border-radius: 0 0 2px 2px; background: var(--lcd-accent); pointer-events: none; }
+	.pmap .node.wait { border-color: color-mix(in srgb, var(--lcd-wait) 70%, transparent); }
+	.pmap .node.off { opacity: 0.45; border-style: dashed; }
+	.pmap .node.lane { background: color-mix(in srgb, var(--project) var(--tint), var(--lcd)); }
+	.pmap .node .h { display: flex; align-items: center; gap: 7px; height: 14px; font: 500 10px/14px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--lcd-dim); white-space: nowrap; overflow: hidden; }
+	.pmap .node .h .g { font-size: 11px; letter-spacing: 0; }
+	.pmap .node .h .l { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+	.pmap .node .h .l:lang(th) { text-transform: none; letter-spacing: 0; font: 500 11px/14px var(--ui); }
+	.pmap .node .h .role { margin-left: auto; flex: none; opacity: 0.7; }
+	.pmap .node .big { display: flex; align-items: baseline; gap: 6px; height: 23px; margin-top: 5px; font: 500 22px/1.05 var(--ui); letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; font-variant-numeric: tabular-nums; }
+	.pmap .node .big .fig { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+	.pmap .node .big .u { flex: none; font: 400 11px var(--mono); color: var(--lcd-dim); letter-spacing: 0; }
+	.pmap .node .big.cash .fig { font: 500 19px/1.2 var(--mono); letter-spacing: 0; }
+	.pmap .node .big.wait { color: var(--lcd-wait); }
+	.pmap .node .big.live { color: var(--lcd-live); }
+	.pmap .node .big.money { color: var(--lcd-accent); }
+	.pmap .node .big.dim { color: var(--lcd-dim); font-size: 16px; }
+	.pmap .node .big.dim .fig { font-size: 16px; }
+	.pmap .node .sub { display: block; margin-top: 3px; font: 500 10.5px/14px var(--mono); color: var(--lcd-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.pmap .node .sub:lang(th) { font-family: var(--ui); }
+	.pmap .node .sub.wait { color: var(--lcd-wait); }
+	.pmap .node .chip { position: absolute; right: -6px; top: -10px; height: 20px; max-width: 190px; overflow: hidden; text-overflow: ellipsis; background: var(--lcd); color: var(--lcd-ink); border-color: var(--lcd-line); }
+	.pmap .node .chip.live { color: var(--lcd-live); }
+	.pmap .node .chip.live i { background: var(--lcd-live); }
+	.pmap .node .chip.wait { color: var(--lcd-wait); border-color: color-mix(in srgb, var(--lcd-wait) 45%, transparent); }
+	.pmap .node .chip.wait i { background: var(--lcd-wait); }
+	.pmap .node .lane-bar { display: flex; gap: 2px; margin-top: 7px; height: 4px; }
+	.pmap .node .lane-bar i { flex: 1; background: var(--lcd-line); border-radius: 1px; }
+	.pmap .node .lane-bar i.on { background: var(--project); }
+	.pmap .node .lane-bar i.wait { background: var(--lcd-wait); }
+
+	/* HUD: the project top-left, the minimap and zoom top-right, the legend bottom-left */
+	.pmap .hud-tl { position: absolute; left: 12px; top: 10px; display: grid; gap: 3px; max-width: calc(100% - 190px); pointer-events: none; }
+	.pmap .hud-tl .title { font: 500 10px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--lcd-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.pmap .hud-tl .title b { color: var(--lcd-ink); font-weight: 600; }
+	.pmap .hud-tl .title b:lang(th) { text-transform: none; letter-spacing: 0; font: 600 11px var(--ui); }
+	.pmap .hud-tl .kind { font: 500 11px var(--mono); color: var(--lcd-dim); }
+	.pmap .hud-tl .kind .wait { color: var(--lcd-wait); }
+	.pmap .hud-tl .kind .live { color: var(--lcd-live); }
+	.pmap .hud-br { position: absolute; right: 12px; top: 10px; display: grid; gap: 6px; justify-items: end; }
+	.pmap .mini { width: 150px; height: 84px; padding: 4px; background: color-mix(in srgb, var(--lcd-ink) 4%, var(--lcd)); border: 1px solid var(--lcd-line); border-radius: var(--r2); }
+	.pmap .mini svg { display: block; width: 100%; height: 100%; }
+	.pmap .mini rect { fill: var(--lcd-dim); }
+	.pmap .mini rect.lane { fill: var(--project); }
+	.pmap .mini rect.wait { fill: var(--lcd-wait); }
+	.pmap .mini rect.v { fill: color-mix(in srgb, var(--lcd-accent) 12%, transparent); stroke: var(--lcd-accent); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+	.pmap .zoom { display: inline-flex; gap: 2px; padding: 2px; background: var(--lcd); border: 1px solid var(--lcd-line); border-radius: var(--r2); }
+	.pmap .zoom button { height: 22px; min-width: 24px; padding: 0 6px; color: var(--lcd-dim); font: 500 11px var(--mono); border-radius: var(--r1); }
+	.pmap .zoom button:hover { color: var(--lcd-ink); background: color-mix(in srgb, var(--lcd-ink) 8%, transparent); }
+	.pmap .canvas .legend { position: absolute; left: 12px; bottom: 10px; display: flex; gap: 12px; font: 500 10px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--lcd-dim); pointer-events: none; }
+	.pmap .canvas .legend .wait { color: var(--lcd-wait); }
+	.pmap .canvas .legend .live { color: var(--lcd-live); }
+	.pmap .canvas .legend .money { color: var(--lcd-accent); }
+
+	/* inspector extras */
+	.pmap .insp-title { margin: 0; font: 500 14px/1.35 var(--ui); }
+	.pmap .insp-p { margin: 0; color: var(--ink-2); font-size: 12px; }
+	.pmap .inspector .queue { border: 1px solid var(--line); border-radius: var(--r3); overflow: hidden; }
+	.pmap .inspector .queue .item:last-child { border-bottom: 0; }
+	.pmap .insp-rows { display: grid; gap: 4px; }
+	.pmap .insp-row { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 5px 8px; border: 1px solid var(--line); border-radius: var(--r2); font-size: 12px; }
+	.pmap a.insp-row:hover { background: var(--raise); }
+	.pmap .insp-row .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.pmap .insp-row .v { font: 500 11px var(--mono); color: var(--ink-3); white-space: nowrap; }
+	.pmap .insp-row .v.soon, .pmap .insp-row .v.problem, .pmap .insp-row .glyph.problem { color: var(--accent); }
+	.pmap .insp-row .v.live { color: var(--live); }
+	.pmap .insp-row .v.done { color: var(--ink-4); }
+
+	@media (max-width: 1100px) {
+		.page.pmap { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; }
+		.pmap .mini { display: none; }
+	}
+	@media (max-width: 720px) {
+		.pmap .hud-tl .kind, .pmap .canvas .legend { display: none; }
+	}
+}
+
+@keyframes pmap-flow { to { stroke-dashoffset: -14; } }

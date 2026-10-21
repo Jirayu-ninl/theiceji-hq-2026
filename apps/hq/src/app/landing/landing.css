@@ -1,0 +1,73 @@
+/* HQ · Bridge — the landing: `/` for someone not signed in, served in place by src/proxy.ts. Outside the
+   shell, one LCD for the whole viewport — black in both modes, scanlines, the well's corner marks — reading
+   HQ out line by line and ending at `› sign in ↵`.
+   Tokens, `.well`, `.brand`, `.hud-label`, `.iconbtn` and `kbd` come from globals.css; everything on the
+   glass takes the LCD's own inks, so light mode changes the glass colour and nothing else. */
+@scope (.landing) {
+	:scope {
+		position: fixed; inset: 0; border: 0; border-radius: 0; box-shadow: none;
+		display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 24px;
+		padding: max(28px, env(safe-area-inset-top)) max(28px, 6vw, env(safe-area-inset-right)) max(22px, env(safe-area-inset-bottom)) max(28px, 6vw, env(safe-area-inset-left));
+		background: var(--lcd); background-image: var(--scan); color: var(--lcd-ink);
+		overflow: auto; overscroll-behavior: contain;
+		/* the glass is dark in both modes: dark scrollbars and controls, and a focus ring that shows on it
+		   (--focus is near-black in light mode) */
+		color-scheme: dark; scrollbar-color: var(--lcd-dim) transparent;
+		--focus: var(--lcd-ink);
+	}
+	:scope::after { opacity: 0.9; }
+
+	.landing-head { display: flex; align-items: center; gap: 14px; min-width: 0; }
+	.landing-head .brand { padding: 0; font-size: 18px; letter-spacing: 0.04em; color: var(--lcd-ink); --accent: var(--lcd-accent); }
+	/* globals.css hides the brand's word in a narrow top bar (≤ 720); here there is room, as on the access screen */
+	.landing-head .brand .txt { display: inline; }
+	.landing-head .hud-label { color: var(--lcd-dim); }
+	.landing-head .theme-btn { margin-left: auto; color: var(--lcd-dim); }
+	.landing-head .theme-btn:hover { color: var(--lcd-ink); background: color-mix(in srgb, var(--lcd-ink) 10%, transparent); }
+
+	/* a line is caret · (key · value) · detail on a grid, so a long detail wraps in its own column */
+	.lines { align-self: center; display: grid; gap: 7px; max-width: 980px; min-width: 0; font: 500 13px/1.6 var(--mono); }
+	.ln { margin: 0; display: grid; grid-template-columns: 1ch minmax(0, 1fr); column-gap: 12px; align-items: baseline; animation: landing-line 1ms both; animation-delay: calc(var(--i, 0) * 110ms); }
+	.ln.has-kv { grid-template-columns: 1ch auto minmax(0, 1fr); }
+	.ln.gap { min-height: 0.6em; }
+	.ln > .c { color: var(--lcd-live); font-style: normal; font-weight: 700; }
+	.ln h1 { margin: 0; font: 500 26px/1.2 var(--ui); letter-spacing: -0.02em; color: var(--lcd-ink); }
+	.kv { display: inline-flex; gap: 12px; align-items: baseline; white-space: nowrap; }
+	.k { min-width: 9ch; color: var(--lcd-dim); }
+	.v { min-width: 8ch; text-align: right; font-weight: 600; color: var(--lcd-ink); }
+	.v.wait { color: var(--lcd-wait); }
+	.v.live { color: var(--lcd-live); }
+	.v.accent { color: var(--lcd-accent); }
+	.d { color: color-mix(in srgb, var(--lcd-ink) 72%, var(--lcd-dim)); overflow-wrap: anywhere; }
+	.d .g { color: var(--lcd-ink); }
+	.rule { color: color-mix(in srgb, var(--lcd-ink) 88%, var(--lcd-dim)); }
+	.rule b { color: var(--lcd-ink); font-weight: 600; }
+
+	/* the prompt: sign in ↵ · the cursor · the link to HQ's source */
+	.act { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+	.go { display: inline-flex; align-items: center; gap: 6px; color: var(--lcd-accent); font-weight: 600; }
+	.go:hover { text-decoration: underline; text-underline-offset: 3px; }
+	.go kbd { color: var(--lcd-accent); border-color: var(--lcd-line); background: transparent; }
+	.cursor { width: 8px; height: 14px; background: var(--lcd-live); animation: landing-blink 1s steps(1) infinite; }
+	.alt { color: var(--lcd-dim); }
+	.alt:hover { color: var(--lcd-ink); text-decoration: underline; text-underline-offset: 3px; }
+
+	.strip { display: flex; align-items: center; gap: 14px; min-width: 0; font: 500 11px var(--mono); color: var(--lcd-dim); white-space: nowrap; }
+	.strip .sp { flex: 1; }
+	.strip .host { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+	@media (max-width: 720px) {
+		:scope { gap: 18px; }
+		.lines { font-size: 12.5px; }
+		.ln h1 { font-size: 22px; }
+		/* narrow: the detail drops under its key · value, still indented past the caret */
+		.ln.has-kv { grid-template-columns: 1ch minmax(0, 1fr); }
+		.ln.has-kv .d { grid-column: 2; padding-left: 12px; }
+		.k { min-width: 8ch; }
+	}
+}
+
+/* Once, on load: each line waits its turn (`--i` × 110 ms) and then shows. Reduced motion and
+   `data-motion="off"` stop every animation (globals.css), which leaves every line showing at once. */
+@keyframes landing-line { from { opacity: 0; } }
+@keyframes landing-blink { 50% { opacity: 0; } }

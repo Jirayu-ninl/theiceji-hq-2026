@@ -1,0 +1,117 @@
+/* Readings (/p/<slug>/readings, /dashboard) — a toolbar (window · age · readout strip) over a deck of panes.
+   Instrument: the VU rack — Time's Money meters (.vu · .fill · .peak),
+   one per project on one shared scale per currency, an axis and dashed guides naming that scale. */
+@scope (html) to (.legacy) {
+	.readp { grid-template-rows: auto minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); }
+
+	/* ---------- toolbar ---------- */
+	.readp .tool { flex: none; }
+	.readp .tool .toolbar { border-bottom: 0; gap: 8px 14px; padding: 4px 8px 4px 10px; }
+	.readp .tool .grp { display: inline-flex; align-items: center; gap: 7px; }
+	.readp .tool .range { font: 500 11px var(--mono); color: var(--ink-3); white-space: nowrap; }
+	.readp .tb-read { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; min-width: 0; }
+	.readp .tb-read .readout { display: inline-flex; align-items: baseline; gap: 6px; padding: 4px 9px; font-size: 12px; line-height: 1.25; white-space: nowrap; }
+	.readp .tb-read .k { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--lcd-dim); }
+	.readp .tb-read .v { font-weight: 500; color: var(--lcd-ink); }
+	.readp .tb-read .dim { color: var(--lcd-dim); }
+
+	/* ---------- deck ---------- */
+	.readp .deck { display: grid; gap: 3px; min-height: 0; min-width: 0; }
+	.readp .deck .pane-head .hud-label { flex: none; white-space: nowrap; }
+	.readp .deck .pane-head .dim { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.readp .deck.off { display: block; background: var(--panel); overflow: auto; }
+	.readp .deck.money.all { grid-template-columns: minmax(0, 1fr) 340px; grid-template-rows: minmax(0, 0.95fr) minmax(0, 1fr); grid-template-areas: "rack rack" "lines cost"; }
+	.readp .deck.money.one { grid-template-columns: minmax(300px, max-content) minmax(0, 1fr); grid-template-rows: minmax(0, 480px) minmax(0, 1fr); grid-template-areas: "rack lines" "cost lines"; }
+	.readp .deck.items { grid-template-rows: repeat(var(--panes, 1), minmax(0, 1fr)); }
+	.readp .deck .rack { grid-area: rack; }
+	.readp .deck .lines { grid-area: lines; }
+	.readp .deck .cost { grid-area: cost; }
+
+	/* ---------- the instrument: VU rack ---------- */
+	.readp .racks { flex: 1; min-height: 0; display: flex; gap: 14px; padding: 10px 16px 10px 8px; overflow-x: auto; overscroll-behavior: contain; }
+	.readp .rk { flex: var(--n) 1 0; min-width: calc(42px + var(--n) * 90px); display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 8px; }
+	.readp .rk + .rk { padding-left: 14px; border-left: 1px dashed var(--line-2); }
+	.readp .rk-h { display: flex; align-items: baseline; gap: 8px; padding-left: 42px; min-width: 0; white-space: nowrap; }
+	.readp .rk-h .hud-label { color: var(--ink-2); }
+	.readp .rk-h .dim { font: 500 10.5px var(--mono); color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; }
+	.readp .meters { display: grid; grid-template-columns: 36px repeat(var(--n), minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr) auto auto auto; column-gap: 6px; row-gap: 3px; min-height: 0; }
+	/* the shared scale: axis figures and dashed guides sit at the same heights the LED fill reaches */
+	.readp .axis { grid-row: 1; grid-column: 1; position: relative; }
+	.readp .axis span { position: absolute; right: 3px; bottom: calc(3px + var(--f) * (100% - 6px)); transform: translateY(50%); font: 500 9.5px/1 var(--mono); color: var(--ink-4); white-space: nowrap; }
+	.readp .guides { grid-row: 1; grid-column: 2 / -1; position: relative; pointer-events: none; }
+	.readp .guides i { position: absolute; left: 0; right: 0; bottom: calc(3px + var(--f) * (100% - 6px)); border-top: 1px dashed var(--line); }
+	.readp .mtr { grid-row: 1 / span 4; display: grid; grid-template-rows: subgrid; justify-items: center; text-align: center; min-width: 0; position: relative; z-index: 1; }
+	.readp .mtr .vu { width: min(100%, 56px); min-height: 0; }
+	.readp .mtr .v { max-width: 100%; font: 600 12px var(--mono); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.readp .mtr .v.dim { font: 500 11px/1.25 var(--ui); color: var(--ink-3); white-space: normal; }
+	.readp .mtr .vs { max-width: 100%; min-height: 13px; font: 500 10px var(--mono); color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.readp .mtr .l { display: inline-flex; align-items: center; justify-content: center; gap: 6px; max-width: 100%; min-width: 0; padding: 1px 4px; border-radius: var(--r1); font-size: 11px; color: var(--ink-2); white-space: nowrap; }
+	.readp .mtr .l span { overflow: hidden; text-overflow: ellipsis; }
+	.readp .mtr a.l:hover { background: var(--raise); color: var(--ink); }
+	.readp .mtr .l .ps { flex: none; font: 500 9.5px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+	.readp .mtr.paused .vu, .readp .mtr.paused .v, .readp .mtr.paused .vs { opacity: 0.45; }
+	.readp .rk.dense .meters { column-gap: 4px; }
+	.readp .rk.dense .mtr .v { font-size: 10.5px; }
+	.readp .rk.dense .mtr .vs { font-size: 9.5px; }
+	.readp .rk.dense .mtr .l { gap: 4px; font-size: 10px; }
+	.readp .deck.money.one .rk { flex: none; }
+	.readp .deck.money.one .meters { grid-template-columns: 36px repeat(var(--n), 104px); }
+
+	/* ---------- notices (what waits behind a number · a connection that stops it) ---------- */
+	.readp .rnote { flex: none; display: flex; align-items: baseline; gap: 8px; margin: 0; padding: 7px 10px; font-size: 12px; color: var(--ink-2); border-bottom: 1px solid var(--line); }
+	.readp .rnote > span { flex: 1; min-width: 0; }
+	.readp .rnote b { font-weight: 500; color: var(--ink); }
+	.readp .rnote a { flex: none; font-weight: 500; color: var(--ink); text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--line-2); white-space: nowrap; }
+	.readp .rnote a:hover { text-decoration-color: currentColor; }
+
+	/* ---------- tables ---------- */
+	.readp .tbl .cur { font: 500 11px var(--mono); color: var(--ink-3); }
+	.readp .tbl .off { color: var(--ink-4); }
+	.readp .tbl .zero { color: var(--ink-3); }
+	.readp .tbl .net { font-weight: 600; color: var(--ink); }
+	.readp .tbl .before { color: var(--ink-3); }
+	.readp .tbl-row > .span { grid-column: 3 / -1; font-size: 12px; color: var(--ink-3); }
+	.readp .tbl-row.tot { border-top: 1px solid var(--line-2); }
+	.readp .tbl-row.tot .tl { font-weight: 600; color: var(--ink); }
+	.readp .tbl-row.tot .num { font-weight: 600; color: var(--ink); }
+	.readp .lines-tbl { --cols: minmax(150px, 1.5fr) 40px repeat(7, minmax(80px, 1fr)); min-width: 860px; }
+	.readp .cost-tbl { --cols: minmax(0, 1fr) 96px 72px; }
+	.readp .cost-tbl .tbl-row > .span { grid-column: 2 / -1; text-align: right; }
+	.readp .hqrow { display: inline-flex; align-items: center; gap: 8px; }
+	.readp .cnote { margin: 0; padding: 8px 10px; font-size: 11.5px; color: var(--ink-3); }
+	.readp .cmp { flex: none; margin: 0; padding: 6px 10px; font-size: 11.5px; color: var(--ink-3); border-bottom: 1px solid var(--line); }
+	.readp .subj-tbl { --cols: minmax(200px, 2fr) minmax(130px, 1fr) 128px 140px 120px 104px; min-width: 880px; }
+	.readp .subj-tbl.global { --cols: 130px minmax(200px, 2fr) minmax(130px, 1fr) 128px 140px 120px 104px; min-width: 1020px; }
+	.readp .subj-tbl .tbl-row > .ttl { display: flex; align-items: center; gap: 8px; }
+	.readp .subj-tbl .ttl .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+	.readp .subj-tbl .acct { font-size: 12px; color: var(--ink-2); }
+	.readp .subj-tbl .when { font: 500 11px var(--mono); color: var(--ink-3); }
+	.readp .subj-tbl .num b { font-weight: 600; color: var(--ink); }
+	.readp .subj-tbl .go { text-align: right; }
+	.readp .xlink { flex: none; padding: 1px 5px; border: 1px solid var(--line); border-radius: var(--r1); font: 500 10.5px var(--mono); color: var(--ink-3); }
+	.readp .xlink:hover { color: var(--ink); background: var(--raise-2); }
+
+	/* ---------- responsive: the deck stacks and scrolls; tables scroll sideways inside their pane ---------- */
+	@media (max-width: 1100px) {
+		.readp .deck.money.all, .readp .deck.money.one, .readp .deck.items { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: none; grid-auto-rows: auto; align-content: start; overflow: auto; overscroll-behavior: contain; }
+		.readp .deck > .pane { grid-area: auto; min-height: auto; }
+		.readp .deck .rack { height: 320px; }
+		.readp .deck .pane-body { flex: none; overflow-x: auto; overflow-y: hidden; }
+	}
+	@media (max-width: 720px) {
+		.readp .tool .range { display: none; }
+		.readp .tb-read { justify-content: flex-start; width: 100%; }
+		.readp .deck .rack { height: auto; }
+		.readp .racks { flex: none; flex-direction: column; gap: 10px; padding: 8px 8px 10px 4px; }
+		.readp .rk { flex: none; height: 260px; min-width: calc(42px + var(--n) * 58px); }
+		.readp .rk + .rk { padding: 10px 0 0; border-left: 0; border-top: 1px dashed var(--line-2); }
+		.readp .rk-h { padding-left: 40px; }
+		.readp .meters { grid-template-columns: 36px repeat(var(--n), minmax(52px, 1fr)); column-gap: 4px; }
+		.readp .mtr .v { font-size: 11px; }
+		.readp .mtr .vs, .readp .mtr .l { white-space: normal; line-height: 1.2; font-size: 10px; }
+		.readp .mtr .l { align-items: baseline; gap: 4px; padding: 1px 0; }
+		.readp .mtr .l span { overflow: visible; overflow-wrap: anywhere; }
+		.readp .deck.money.one .meters { grid-template-columns: 36px repeat(var(--n), 96px); }
+	}
+	.readp .rk .empty { padding: 14px 4px; }
+}

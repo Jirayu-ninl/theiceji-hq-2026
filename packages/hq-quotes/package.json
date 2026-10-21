@@ -1,0 +1,32 @@
+{
+  "name": "@theiceji/hq-quotes",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "HQ Quotes: clients, quotations Q-YYYY-NNN with lines, VAT 7 % and withholding 3 %, totals computed on read and frozen when sent, and the bilingual PDF. Framework-free; on @theiceji/hq-ops, @theiceji/hq-core and @theiceji/hq-assets.",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "bun test test",
+    "verify": "bunx biome ci . && bunx tsc --noEmit",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "dependencies": {
+    "@theiceji/hq-assets": "workspace:*",
+    "@theiceji/hq-core": "workspace:*",
+    "@theiceji/hq-db": "workspace:*",
+    "@theiceji/hq-ops": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "pdfkit": "^0.20.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.13",
+    "@types/bun": "^1.4.2",
+    "@types/node": "^26.5.1",
+    "typescript": "^7.0.2",
+    "@types/pdfkit": "^0.17.6"
+  }
+}

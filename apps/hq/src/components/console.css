@@ -1,0 +1,61 @@
+/* Console — the shell's LCD panel in the grid's `console` row, and its two
+   switches in the footer (`▶ n` and the console toggle). Styles `.console…`,
+   `.log`, `.runs`, `.shortcuts-grid` and `.console-toggle`. The panel is a screen: it reads the same in
+   both themes, so everything on it uses the LCD slots (a kbd, the focus ring and the run bar too). */
+@scope (html) to (.legacy) {
+	.console { position: relative; --focus: var(--lcd-ink); grid-area: console; height: var(--console-h); min-width: 0; overflow: hidden; background: var(--lcd); background-image: var(--scan); color: var(--lcd-ink); font: 500 11.5px/1.5 var(--mono); border-top: 1px solid var(--lcd-line); display: flex; flex-direction: column; transition: height 160ms ease-out; }
+	.console kbd { color: var(--lcd-dim); border-color: var(--lcd-line); background: transparent; }
+	.console-tabs { flex: none; height: 28px; display: flex; align-items: center; gap: 2px; padding: 0 6px; border-bottom: 1px solid var(--lcd-line); }
+	.console-tabs button { position: relative; color: var(--lcd-dim); padding: 3px 10px; border-radius: 3px; }
+	.console-tabs button:hover { color: var(--lcd-ink); }
+	.console-tabs button[aria-selected="true"] { color: var(--lcd-accent); background: #ffffff0d; }
+	.console-tabs button[aria-selected="true"]::before { content: ""; position: absolute; left: 10px; right: 10px; bottom: -2px; height: 2px; border-radius: 2px; background: var(--lcd-accent); pointer-events: none; }
+	.console-tabs .sp { flex: 1; }
+	.console-tabs .iconbtn { width: 24px; height: 24px; padding: 0; color: var(--lcd-dim); }
+	.console-tabs .iconbtn:hover { color: var(--lcd-ink); background: #ffffff10; }
+	.console-stale { margin-right: 6px; font-size: 10.5px; color: var(--lcd-accent); white-space: nowrap; }
+	.console-body { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 8px 12px; }
+	.console-body:focus-visible { outline-offset: -2px; }
+	.console-note { color: var(--lcd-dim); }
+	.console-note.problem { color: var(--lcd-accent); }
+
+	/* Log: time · who · what · result, newest at the bottom */
+	.log { display: grid; grid-template-columns: auto minmax(0, max-content) minmax(0, max-content) minmax(0, 1fr); gap: 2px 14px; align-content: start; margin: 0; padding: 0; list-style: none; white-space: nowrap; }
+	.log li { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
+	.log li > * { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+	.log .ts { color: var(--lcd-dim); } .log .actor { color: var(--lcd-accent); } .log .act { color: var(--lcd-ink); } .log .res { color: var(--lcd-dim); }
+	.log .res.wait { color: var(--lcd-wait); }
+	.log :lang(th) { font-family: var(--ui); }
+
+	/* Runs: name · bar · state · cost, running first */
+	.runs { display: grid; grid-template-columns: minmax(0, 200px) minmax(40px, 1fr) max-content minmax(0, max-content); gap: 6px 12px; align-content: start; margin: 0; padding: 0; list-style: none; }
+	.runs .run { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; }
+	.runs .run > * { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.runs .label:lang(th) { font-family: var(--ui); }
+	.runs .prog { background: #ffffff1a; }
+	.runs .prog i { background: var(--lcd-live); }
+	.runs .state-running { color: var(--lcd-live); } .runs .state-failed { color: var(--lcd-wait); } .runs .state-idle { color: var(--lcd-dim); }
+	.runs .cost { color: var(--lcd-dim); }
+
+	/* Shortcuts: the shell's keys, then this page's */
+	.shortcuts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px 20px; align-content: start; margin: 0; }
+	.shortcuts-grid div { display: flex; gap: 10px; align-items: baseline; min-width: 0; }
+	.shortcuts-grid dt { flex: none; }
+	.shortcuts-grid dd { margin: 0; min-width: 0; }
+	.shortcuts-grid kbd { min-width: 52px; text-align: center; color: var(--lcd-accent); }
+
+	/* the footer's switches */
+	.foot .agents, .foot .console-toggle { --focus: var(--lcd-ink); flex: none; white-space: nowrap; }
+	.foot .agents:hover { background: #ffffff10; }
+	.foot .agents.zero { color: var(--lcd-dim); }
+	.console-toggle { color: var(--lcd-dim); padding: 2px 6px; border: 1px solid var(--lcd-line); }
+	.console-toggle:hover, .console-toggle[aria-expanded="true"] { color: var(--lcd-ink); background: #ffffff10; }
+	.foot .console-toggle kbd { border: 0; padding: 0; }
+
+	@media (max-width: 720px) {
+		/* a row is two lines: time · who · what, then the result */
+		.log { grid-template-columns: auto minmax(0, max-content) minmax(0, 1fr); row-gap: 6px; }
+		.log .res { grid-column: 2 / -1; }
+		.runs { grid-template-columns: minmax(0, 1fr) 40px max-content minmax(0, max-content); }
+	}
+}

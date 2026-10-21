@@ -1,0 +1,9 @@
+# Source is LF on every checkout, Windows included — the `eol` attribute
+# overrides core.autocrlf — so Biome's formatter (LF) and the documented verify
+# commands pass on a clean checkout without rewriting anything.
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf

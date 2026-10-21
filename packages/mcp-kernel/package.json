@@ -1,0 +1,35 @@
+{
+  "name": "@theiceji/mcp-kernel",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The MCP server kernel — Streamable HTTP surface and its gate, workspace/tool contract, per-caller catalog, protected-resource metadata, rate budgets and config. Neutral and framework-free: it knows no app, no database and no scope vocabulary; each server brings its own workspaces, caller shape and token check.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./config": "./src/config.ts",
+    "./server": "./src/server.ts",
+    "./log": "./src/log.ts",
+    "./localEnv": "./src/localEnv.ts",
+    "./catalog": "./src/core/catalog.ts",
+    "./results": "./src/core/results.ts",
+    "./workspace": "./src/core/workspace.ts",
+    "./metadata": "./src/auth/metadata.ts",
+    "./rateLimit": "./src/auth/rateLimit.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "lint": "bunx biome check --write",
+    "verify": "bunx biome ci . && bunx tsc --noEmit",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.13",
+    "@types/bun": "^1.4.2",
+    "@types/node": "^26.5.1",
+    "typescript": "^7.0.2"
+  }
+}

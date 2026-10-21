@@ -1,0 +1,187 @@
+/* Board (/p/<slug>/board, /board) — Lanes + Inspector.
+   Instrument: the lane footer, an LCD of the lane's price sum. Everything else is plain SaaS. */
+@scope (html) to (.legacy) {
+	.boardp { --insp-w: min(var(--size-insp-board, 340px), 50vw); --lane-w: 248px; grid-template-columns: minmax(0, 1fr) var(--insp-w); grid-template-areas: "main insp"; }
+	.board-pane { grid-area: main; }
+	.board-pane .pane-body { display: flex; flex-direction: column; }
+
+	/* toolbar: label filter (and project filter on the global route) */
+	.board-pane .toolbar .filter { display: inline-flex; gap: 2px; padding: 2px; background: var(--well); border: 1px solid var(--line); border-radius: var(--r2); flex-wrap: wrap; }
+	.board-pane .toolbar .filter button { height: 20px; padding: 0 8px; font: 500 11px var(--ui); color: var(--ink-3); border-radius: 3px; display: inline-flex; align-items: center; gap: 5px; }
+	.board-pane .toolbar .filter button:hover { color: var(--ink); background: var(--raise); }
+	.board-pane .toolbar .filter button[aria-pressed="true"] { color: var(--ink); background: var(--raise-2); }
+
+	/* lanes: the lanes you work in scroll sideways in their own run, and the awaiting-payment lane sits beside the run,
+	   pinned right — never drawn over a lane (it used to be sticky inside the one scroller and covered Doing and Review).
+	   Lanes give up width down to a floor before the run scrolls; each lane scrolls its own cards */
+	.lanes { flex: 1; min-height: 0; display: flex; gap: 8px; padding: 10px; align-items: stretch; }
+	.lanes-run { flex: 1; min-width: 0; min-height: 0; display: flex; gap: 8px; overflow: auto hidden; overscroll-behavior: contain; align-items: stretch; }
+	.lane { position: relative; flex: 0 1 var(--lane-w); min-width: 208px; min-height: 0; display: flex; flex-direction: column; background: var(--well); border: 1px solid var(--line); border-radius: var(--r3); }
+	.lane.awaiting { flex: 0 0 var(--lane-w); margin-bottom: var(--run-bar, 0px); box-shadow: var(--shadow); }
+	.lane.over { box-shadow: inset 0 0 0 1px var(--accent); }
+	.lane-head { position: relative; flex: none; height: 28px; display: flex; align-items: center; background: var(--panel-head); border-bottom: 1px solid var(--line); border-radius: var(--r3) var(--r3) 0 0; }
+	/* the head opens the lane in the inspector */
+	.lane-pick { flex: 1; min-width: 0; height: 100%; display: flex; align-items: center; gap: 8px; padding: 0 10px; border-radius: var(--r3) var(--r3) 0 0; text-align: left; cursor: pointer; }
+	.lane-pick:hover { background: var(--raise); }
+	.lane-pick .hud-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.lane-head .n { font: 600 12px var(--mono); color: var(--ink-2); }
+	.lane-head .n.wait { color: var(--wait); }
+	.lane-head .role { margin-left: auto; font: 500 10px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-4); }
+	.lane.current .lane-head::before { content: ""; position: absolute; inset: 0; border-radius: var(--r3) var(--r3) 0 0; box-shadow: inset 0 0 0 1px var(--accent); pointer-events: none; }
+	/* a lane open in the inspector: the selected grammar — the rail's tick on the head's top edge, 10px in */
+	.lane.sel .lane-head { background: var(--raise-2); }
+	.lane.sel .lane-head::before { content: ""; position: absolute; inset: -1px auto auto 10px; width: 18px; height: 2px; border-radius: 0 0 2px 2px; box-shadow: none; background: var(--accent); pointer-events: none; }
+	/* ＋ Lane: the pool's dashed "new" place, after the last lane you work in */
+	.lane-add { flex: 0 0 132px; align-self: flex-start; min-height: 56px; }
+	.lane-body { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 6px; display: grid; gap: 6px; align-content: start; }
+	.lane-body .empty { padding: 8px 6px; }
+	.lane-body .ghost { height: 30px; border: 1px dashed var(--line-2); border-radius: var(--r2); color: var(--ink-3); font-size: 12px; }
+	.lane-body .ghost:hover { color: var(--ink); background: var(--raise); }
+	/* signature instrument: the lane footer is an LCD readout of the lane's sum */
+	.lane-foot { flex: none; padding: 6px; border-top: 1px solid var(--line); }
+	.lane-foot .readout { padding: 5px 8px; }
+	.lane-foot .readout .big { font: 500 15px/1.2 var(--mono); letter-spacing: 0; text-wrap: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.lane-foot .readout .big .u { font-size: 10.5px; color: var(--lcd-dim); }
+
+	/* card */
+	.bcard { padding: 8px 10px; cursor: grab; gap: 5px; }
+	.bcard:active { cursor: grabbing; }
+	.bcard.dragging { opacity: 0.4; }
+	.bcard .t { text-wrap: wrap; line-height: 1.35; }
+	.bcard .m { align-items: flex-start; }
+	.bcard .labels { display: flex; flex-wrap: wrap; gap: 3px; min-width: 0; }
+	.bcard .v { margin-left: auto; flex: none; }
+	.bcard .v.price { color: var(--ink-2); }
+	.bcard.paid { opacity: 0.5; }
+
+	/* table view */
+	.board-pane .tbl { --cols: minmax(0, 1fr) 110px 150px 90px 80px 110px; }
+	.board-pane .tbl.global { --cols: 140px minmax(0, 1fr) 110px 150px 90px 80px; }
+	.board-pane .tbl-row .labels { display: flex; gap: 3px; overflow: hidden; }
+	.board-pane .tbl-row .lane-name { color: var(--ink-2); }
+	.board-pane .tbl-row.paused { opacity: 0.55; }
+	.global-read { flex: none; display: flex; gap: 8px; padding: 10px 10px 0; }
+	.global-read .readout { min-width: 220px; }
+	.global-read .readout .big { font: 500 20px/1.1 var(--mono); }
+
+	/* scenarios */
+	.boardp.paused .lanes, .boardp.paused .tbl { opacity: 0.6; }
+
+	/* Archived and Trash: one quiet sentence saying what the view is */
+	.shelf-note { flex: none; margin: 0; padding: 8px 10px; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--ink-3); }
+
+	/* inspector */
+	/* candidate for hq.css — also defined in notes.css, inbox.css, project.css */
+	.inspector .labels { display: flex; flex-wrap: wrap; gap: 4px; }
+	.inspector .dev-acts .btn[disabled] { opacity: 0.35; }
+	/* what can't be deleted (or restored) says why, in words, where the button would be */
+	.inspector .dev-acts .kept { align-self: center; font-size: 11.5px; line-height: 1.35; color: var(--ink-3); }
+
+	@media (max-width: 1100px) {
+		.boardp { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; }
+	}
+	@media (max-width: 720px) {
+		/* lanes stack; no horizontal page overflow */
+		.lanes { flex-direction: column; overflow: auto; padding: 8px; gap: 8px; }
+		.lanes-run { flex: none; flex-direction: column; overflow: visible; }
+		.lane { flex: none; min-width: 0; min-height: 0; }
+		.lane.awaiting { flex: none; margin-bottom: 0; box-shadow: none; }
+		.lane-add { flex: none; align-self: stretch; min-height: 36px; }
+		.lane-body { max-height: 320px; }
+		.board-pane .tbl { --cols: minmax(0, 1fr) 90px 80px; }
+		.board-pane .tbl.global { --cols: 100px minmax(0, 1fr) 80px; }
+		.board-pane .tbl .c-labels, .board-pane .tbl .c-due, .board-pane .tbl .c-client, .board-pane .tbl.global .c-lane { display: none; }
+		.global-read .readout { flex: 1; }
+	}
+	.inspector .labels { display: flex; flex-wrap: wrap; gap: 4px; }
+	.fcard textarea { font: 12.5px/1.5 var(--ui); color: var(--ink); resize: vertical; min-height: 80px; text-transform: none; letter-spacing: 0; }
+	.board-pane .tbl-row.paused { opacity: 0.55; }
+
+	/* ── a card that holds a whole client job ── */
+
+	/* card colour: a 3px stripe laid over the card's own left edge, from the fixed swatch list. The body never takes the
+	   colour, and selection stays the accent tick on the top edge (::before) — the stripe is ::after, identity only, never a state.
+	   Light mode darkens the swatch so the stripe still reads on the grey body. */
+	.bcard { --card-edge: var(--card); }
+	.bcard[data-color]::after { content: ""; position: absolute; inset-block: -1px; inset-inline-start: -1px; width: 3px; border-radius: var(--r3) 0 0 var(--r3); background: var(--card-edge); pointer-events: none; }
+	:scope[data-theme="light"] .bcard, :scope[data-theme="light"] .cdot { --card-edge: color-mix(in srgb, var(--card) 62%, #000); }
+	@media (prefers-color-scheme: light) { :scope:not([data-theme="dark"]) .bcard, :scope:not([data-theme="dark"]) .cdot { --card-edge: color-mix(in srgb, var(--card) 62%, #000); } }
+	/* the client, faint above the title */
+	.bcard .who { font: 500 11px/1.2 var(--ui); color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: -2px; }
+	/* follow-ups · prompt · files, as module glyphs beside the value */
+	.bcard .bits { display: inline-flex; gap: 6px; flex: none; margin-left: auto; color: var(--ink-3); }
+	.bcard .bits > span, .fu-n { display: inline-flex; align-items: center; }
+	.bcard .bits + .v { margin-left: 8px; }
+	svg.fu-i { width: 11px; height: 11px; stroke-width: 2; margin-right: 1px; }
+	/* paid so far: the shared .meter, thin (lit = in, unlit = still owed) */
+	.bcard .paymeter { height: 3px; margin-top: 1px; }
+	/* the drop prediction: a faint dashed slot the height of the dragged card, where it will land */
+	.drop-slot { flex: none; border: 1px dashed var(--ink-4); border-radius: var(--r3); background: color-mix(in srgb, var(--ink) 3%, transparent); pointer-events: none; }
+	/* table: the colour as a short bar before the title, follow-ups counted after it */
+	.board-pane .tbl-row .c-title { display: flex; align-items: center; gap: 7px; min-width: 0; }
+	.board-pane .tbl-row .c-title > span:not(.fu-n) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.board-pane .tbl-row .c-client { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.cdot { --card-edge: var(--card); flex: none; width: 3px; height: 14px; border-radius: 2px; background: var(--card-edge); }
+	.fu-n { flex: none; font: 500 10.5px var(--mono); color: var(--ink-3); }
+
+	/* inspector sections (`.sect`, globals.css): follow-ups · payments · prompt · files · colour, each a HUD label over plain SaaS parts */
+	.dev-who { font: 500 11.5px var(--ui); color: var(--ink-3); margin-bottom: -4px; }
+	.dev-who .once, .inspector .facts .once { color: var(--ink-4); }
+	.dev-p.warn { color: var(--accent); }
+	.inspector .facts dd :lang(th), .inspector .facts dd:lang(th) { font-family: var(--ui); }
+	.inspector .facts dd a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+	/* a follow-up: work that came after the card's task — title + price on one line, details under it, then its bits */
+	.fu-list { display: grid; gap: 6px; }
+	.fu { display: grid; gap: 5px; padding: 7px 9px 8px; border: 1px solid var(--line); border-radius: var(--r3); background: var(--panel); min-width: 0; }
+	.fu-top { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+	.fu-g { flex: none; color: var(--ink-4); }
+	.fu-g svg.fu-i { width: 12px; height: 12px; }
+	.fu-t { flex: 1; min-width: 0; font-weight: 500; font-size: 12.5px; line-height: 1.35; }
+	.fu-v { flex: none; font: 500 11.5px var(--mono); color: var(--ink-2); }
+	.fu .md { font-size: 12px; color: var(--ink-2); }
+	.fu .md p { margin: 0; }
+	.fu-m { font: 500 10.5px var(--mono); color: var(--ink-3); }
+	.fu-acts { display: flex; gap: 4px; }
+	.fu-acts .btn { height: 20px; font-size: 10.5px; color: var(--ink-3); border-color: var(--line); }
+	.fu-acts .btn:hover { color: var(--ink); }
+	.fu .plink.compact .plink-t { font-size: 12px; }
+	.fu .files { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+	.fu-form { background: var(--panel); }
+
+	/* payments: the shared .meter, one row per line (a voided one struck but kept — money history is append-only) */
+	.sect .meter { height: 6px; border-radius: 1px; }
+	.pays { display: grid; gap: 2px; }
+	.pay { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 8px; min-height: 26px; padding: 2px 4px 2px 8px; border: 1px solid var(--line); border-radius: var(--r2); font-size: 12px; }
+	.pay-k { font: 500 10.5px var(--mono); color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.04em; }
+	.pay-d { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); }
+	.pay-v { font: 500 11.5px var(--mono); color: var(--ink); }
+	.pay-x { height: 20px; font-size: 10.5px; color: var(--ink-3); border-color: var(--line); opacity: 0; }
+	.pay:hover .pay-x, .pay-x:focus-visible { opacity: 1; }
+	.pay-n { grid-column: 1 / -1; margin-top: -3px; padding-bottom: 3px; font-size: 11.5px; color: var(--ink-3); overflow-wrap: anywhere; }
+	.pay.void .pay-v, .pay.void .pay-d { text-decoration: line-through; color: var(--ink-4); }
+	.pay-chips { justify-self: start; flex-wrap: wrap; }
+	.pay-chips button { font-family: var(--mono); }
+	.pay-form .seg button { white-space: nowrap; }
+
+	/* the prompt a job ran on: title + where it lives, the variant's words as a .quote (words that leave HQ for a generator) */
+	.plink { display: grid; gap: 6px; min-width: 0; }
+	.plink-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+	.plink-t { font-weight: 500; font-size: 12.5px; }
+	.plink-m { font: 500 10.5px var(--mono); color: var(--ink-3); }
+	.inspector .quote.mono { font: 11.5px/1.5 var(--mono); color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 120px; overflow: auto; margin: 0; }
+
+	/* files: thumbs of the linked assets + a small drop target; unlinking never deletes the asset */
+	.files { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+	.ftile { position: relative; margin: 0; display: grid; gap: 3px; min-width: 0; }
+	.ftile .thumb { aspect-ratio: 4 / 3; }
+	.ftile .thumb img { width: 100%; height: 100%; object-fit: cover; }
+	.ftile figcaption { display: grid; min-width: 0; font: 500 10px var(--mono); color: var(--ink-3); }
+	.ftile .fn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); }
+	.ftile .fx { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; background: var(--panel); border: 1px solid var(--line); opacity: 0; }
+	.ftile:hover .fx, .ftile .fx:focus-visible { opacity: 1; }
+	.fdrop { aspect-ratio: 4 / 3; padding: 6px; font-size: 11px; line-height: 1.3; cursor: pointer; background: transparent; }
+	.fdrop small { display: block; color: var(--ink-4); font-size: 10px; }
+	.fdrop:hover { background: var(--raise); color: var(--ink); }
+	.fdrop-off { grid-column: 1 / -1; }
+}

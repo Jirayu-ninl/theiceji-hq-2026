@@ -1,0 +1,51 @@
+# TheIceJi HQ (monorepo) -- Universal Git Ignore
+
+# dependencies
+**/node_modules
+/.pnp
+.pnp.js
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+# NOTE: the root bun.lock IS committed — it lets Vercel auto-detect bun and gives
+# reproducible installs for apps/hq on Vercel.
+bun.lockb
+
+# turbo
+.turbo
+
+# Windows reserved device name — stray "nul" file created when a tool/script
+# redirects output to `nul` from Git Bash or PowerShell (where `nul` is NOT the
+# real null device, unlike cmd.exe), so a real file gets written instead.
+nul
+
+# development / build
+/coverage
+.env
+.env.*
+!.env.example
+**/.next/
+**/out/
+**/dist/
+*.tsbuildinfo
+
+# editors / agents (local only)
+.claude
+.mcp.json
+settings.local.json
+.vscode/*
+!.vscode/extensions.json
+
+# vercel
+.vercel
+
+# misc
+.DS_Store
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.vercel
+backups/

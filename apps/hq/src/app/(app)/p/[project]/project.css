@@ -1,0 +1,5 @@
+/* Project page (/p/<slug>) — its Modules view: one row per module, in rail order. */
+@scope (html) to (.legacy) {
+	.module-tbl { --cols: 24px minmax(0, 1fr) 80px 80px; }
+	@media (max-width: 720px) { .module-tbl { --cols: 24px minmax(0, 1fr) 56px; } .module-tbl > * > :nth-child(4) { display: none; } }
+}

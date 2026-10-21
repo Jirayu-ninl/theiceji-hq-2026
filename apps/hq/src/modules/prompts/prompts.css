@@ -1,0 +1,130 @@
+/* Prompts (/p/<slug>/prompts, /prompts) — Pool + Viewer/Editor.
+   The text is the picker: each variant a chip in the sentence. Everything else is plain SaaS. */
+@scope (html) to (.legacy) {
+	.promptsp { --insp-w: min(var(--size-insp-prompts, 420px), 50vw); grid-template-columns: minmax(0, 1fr) var(--insp-w); grid-template-areas: "main insp"; }
+	.pool-pane { grid-area: main; }
+	.pool-pane .pool { --pool-min: 200px; }
+	.pool-pane .pane-body.paused { opacity: 0.55; }
+	.pool-pane .toolbar .seg button { text-transform: none; }
+	.pool-pane .toolbar select { max-width: 180px; }
+
+	/* cards */
+	.prcard { cursor: pointer; }
+	.prcard .thumb { aspect-ratio: 16 / 9; }
+	.prcard .m .tag { font: 500 10.5px var(--ui); }
+	.prcard .m .new { color: var(--accent); }
+	.prcard .m .chip { height: 18px; padding: 0 6px; font-size: 10px; }
+	.pcard.ghost { min-height: 150px; }
+	.pcard.loading .thumb, .pcard.loading .t, .pcard.loading .m { color: var(--ink-4); }
+
+	/* table (List) */
+	.pool-pane .tbl { --cols: minmax(0, 1fr) 70px 150px 64px 90px; }
+	.pool-pane .tbl.global { --cols: 140px minmax(0, 1fr) 70px 150px 64px 90px; }
+	.pool-pane .tbl-row .dim { color: var(--ink-3); font: 500 11px var(--mono); }
+	.pool-pane .tbl-row .t { display: flex; align-items: center; gap: 6px; }
+	.pool-pane .tbl-row .t .glyph { flex: none; }
+	.pool-pane .tbl-row .t .new { color: var(--accent); font: 500 10.5px var(--mono); }
+
+	/* viewer */
+	.tags { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+	.ptext { margin: 0; text-wrap: wrap; word-break: break-word; background: var(--well); border: 1px solid var(--line); border-radius: var(--r2); padding: 10px 12px; font: 12.5px/1.6 var(--mono); color: var(--ink); }
+	.ptext.neg { color: var(--ink-3); font-size: 11.5px; padding: 8px 12px; }
+	.pedit { display: grid; gap: 6px; }
+	.pedit .editor { min-height: 160px; border: 1px solid var(--line-2); border-radius: var(--r2); }
+	.pedit .editor.neg { min-height: 56px; color: var(--ink-2); font-size: 11.5px; }
+	.examples { display: flex; gap: 8px; align-items: flex-start; overflow: auto; overscroll-behavior: contain; padding-bottom: 2px; }
+	.ex { flex: none; width: 108px; margin: 0; display: grid; gap: 4px; }
+	/* every example is a square: the result covers it, cropped to fill */
+	.ex .thumb { width: 108px; aspect-ratio: 1; }
+	.ex figcaption { display: grid; gap: 1px; }
+	.ex figcaption .cap { color: var(--ink-2); font: 500 11px/1.3 var(--ui); text-wrap: wrap; }
+	.ex figcaption .rate { font: 500 10.5px var(--mono); color: var(--accent); letter-spacing: 0.04em; }
+	.ex figcaption .rate.none { color: var(--ink-4); letter-spacing: 0; }
+	@media (max-width: 1100px) {
+		.promptsp { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; }
+	}
+	@media (max-width: 720px) {
+		.pool-pane .pool { grid-template-columns: 1fr; }
+		.pool-pane .pcard.ghost { min-height: 44px; }
+		.pool-pane .tbl, .pool-pane .tbl.global { --cols: minmax(0, 1fr) 64px; }
+		.pool-pane .tbl .nn { display: none; }
+		.pool-pane .toolbar input[type="search"] { min-width: 0; flex: 1; }
+	}
+	.pool-pane .toolbar input[type="search"] { min-width: 180px; }
+	.pedit .fcard { padding: 8px; }
+
+	/* inspector: what you do every day is a button beside what it acts on; the rest is the owner's ⋯ */
+	.vsect { display: grid; gap: 8px; }
+	.vhead { min-height: 22px; }
+	.vhead .vlabel, .sect .vlabel { display: flex; align-items: baseline; gap: 8px; min-width: 0; overflow: hidden; }
+	.vhead .vlabel .hud-label { flex: none; }
+	.vhead .vlabel .state-word { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.vhead .vacts { display: inline-flex; align-items: center; gap: 4px; flex: none; }
+	.vacts .vneed { font: 500 10.5px var(--mono); color: var(--ink-3); letter-spacing: 0.04em; margin-right: 2px; }
+	.vacts .btn-pri[aria-disabled="true"] { opacity: 0.45; }
+
+	/* the text is the picker: a variant is a chip in the sentence showing its value — marked like a
+	   filled value — or, not picked yet, its name in a dashed hole; ▾ opens its options */
+	.ptext.fill { white-space: pre-wrap; line-height: 1.9; }
+	.vchip { display: inline; padding: 1px 4px 1px 5px; margin: 0 1px; border: 0; border-radius: var(--r1); font: inherit; line-height: inherit; color: var(--ink); background: color-mix(in srgb, var(--accent) 14%, transparent); box-shadow: inset 0 -1px 0 var(--accent); cursor: pointer; text-align: left; white-space: pre-wrap; }
+	.vchip:hover, .vchip[aria-expanded="true"] { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+	.vchip.open { color: var(--ink-3); background: transparent; box-shadow: none; outline: 1px dashed var(--line-2); outline-offset: -1px; font-size: 11px; letter-spacing: 0.04em; }
+	.vchip.open:hover { color: var(--ink); background: var(--raise); }
+	.vchip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+	/* a block value fills its own lines */
+	.vchip.block { display: inline-block; width: 100%; margin: 2px 0; padding: 3px 6px; vertical-align: top; }
+	.vcaret { margin-left: 3px; font-size: 9px; color: var(--ink-3); }
+	.vlegend { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font: 500 10.5px var(--mono); color: var(--ink-3); }
+	.vmenu { min-width: 260px; max-width: min(380px, calc(100vw - 16px)); }
+	.vmenu-head { display: grid; gap: 2px; padding: 8px 12px 2px; }
+	.vmenu-head .sub { font: 500 11px var(--ui); color: var(--ink-3); }
+	.vmenu-group { padding: 6px 8px 2px; font: 500 9.5px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-4); }
+	.vopt { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px; align-items: baseline; }
+	.vopt-key { font: 600 11.5px var(--mono); }
+	.vopt-val { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+	/* a variant's options (its chip's ＋ Option) and the library's form: key · value · ✕ rows */
+	.optform { gap: 6px; }
+	.optrow { display: grid; grid-template-columns: 96px minmax(0, 1fr) 22px; gap: 6px; align-items: start; }
+	.optrow textarea { min-height: 28px; resize: vertical; font: 12px/1.45 var(--mono); }
+	.optrow .iconbtn { width: 22px; height: 22px; margin-top: 3px; }
+
+	/* examples: All by default, Matching narrows to the picks of now; each tagged with its keys; a click opens Made with */
+	.ex-only { margin-left: 2px; }
+	.ex-only button { height: 20px; padding: 0 8px; font: 500 10.5px var(--mono); letter-spacing: 0.02em; text-transform: none; }
+	.ex-hit { display: block; width: fit-content; padding: 0; border: 0; background: none; border-radius: var(--r2); cursor: pointer; }
+	.ex-hit:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+	.ex.open .thumb { box-shadow: 0 0 0 1px var(--line-2); }
+	.ex-tags { display: flex; flex-wrap: wrap; gap: 3px; margin: 2px 0 1px; }
+	.ex-tag { display: inline-block; max-width: 100%; padding: 0 5px; border: 1px solid var(--line); border-radius: var(--r1); background: var(--well); font: 500 10px/16px var(--mono); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.ex-tag.none { color: var(--ink-4); border-style: dashed; background: transparent; }
+	.made { gap: 6px; }
+	.made-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+	.made-h .iconbtn { width: 22px; height: 22px; }
+	.made .made-row { display: grid; grid-template-columns: minmax(90px, max-content) minmax(0, 1fr); align-items: center; gap: 8px; }
+	.made .row .sp { flex: 1; }
+
+	/* the examples end in the pool's dashed ＋ place: Attach a result (a), as big as an example beside it
+	   (the row's height; a square when there is none yet) */
+	.pcard.ghost.ex-add { width: 108px; align-self: stretch; min-height: 108px; padding: 0; border-radius: var(--r2); font-size: 11.5px; flex: none; }
+	.pcard.ghost.ex-add[aria-pressed="true"] { color: var(--ink); background: var(--raise); }
+
+	/* Prompts › Variants — the library: a table of names, keys and how many prompts write each; options as rows */
+	.pool-pane .tbl.libtbl { --cols: minmax(140px, 220px) minmax(0, 1fr) 96px; }
+	.libtbl .libname { font: 600 11.5px var(--mono); letter-spacing: 0.02em; }
+	.vlist { display: grid; border: 1px solid var(--line); border-radius: var(--r2); overflow: hidden; }
+	.vrow { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 10px; align-items: baseline; padding: 6px 10px; color: var(--ink-2); }
+	.vrow + .vrow { box-shadow: 0 -1px 0 var(--line); }
+	.vrow-key { font: 600 11.5px var(--mono); color: var(--ink); overflow-wrap: anywhere; }
+	.vrow-val { font: 12px/1.45 var(--mono); white-space: pre-wrap; word-break: break-word; }
+	@media (max-width: 720px) {
+		.pool-pane .tbl.libtbl { --cols: minmax(0, 1fr) minmax(0, 1fr); }
+		.optrow { grid-template-columns: 72px minmax(0, 1fr) 22px; }
+	}
+}
+
+/* Generate with — one of the owner's generators makes an example. */
+@scope (html) to (.legacy) {
+	.gen-with { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; }
+	.gen-with select { height: 26px; padding: 0 6px; font-size: 12px; flex: 1; min-width: 0; }
+}

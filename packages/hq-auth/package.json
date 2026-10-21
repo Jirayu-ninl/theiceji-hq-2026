@@ -1,0 +1,38 @@
+{
+  "name": "@theiceji/hq-auth",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "HQ's sign-in — server-side sessions over @theiceji/hq-db, the cookie, scrypt passwords, the attempt throttle and the account screens' data access. HQ's alone.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./account": "./src/account.ts",
+    "./actions": "./src/actions.ts",
+    "./constants": "./src/constants.ts",
+    "./cookie": "./src/cookie.ts",
+    "./device": "./src/device.ts",
+    "./password": "./src/password.ts",
+    "./paths": "./src/paths.ts",
+    "./session": "./src/session.ts",
+    "./throttle": "./src/throttle.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@theiceji/hq-db": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "zod": "^4.6.5"
+  },
+  "peerDependencies": {
+    "next": "^16.3.5",
+    "react": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.1",
+    "@types/react": "^19.3.0",
+    "next": "^16.3.5",
+    "react": "^19.3.0",
+    "typescript": "^7.0.2"
+  }
+}

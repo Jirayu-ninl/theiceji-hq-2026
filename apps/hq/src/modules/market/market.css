@@ -1,0 +1,167 @@
+/* Market (/p/<slug>/market) — listings (Table + Inspector), products (Pool + Inspector), money (lines + Payouts).
+   Instrument: the net tape — price · each fee from the owner's fee sheet ·
+   what reaches you (an estimate, dashed) with the recorded 7-day truth under a rule. */
+@scope (html) to (.legacy) {
+	.marketp { --insp-w: min(var(--size-insp-market, 420px), 50vw); grid-template-columns: minmax(0, 1fr) var(--insp-w); grid-template-rows: minmax(0, 1fr); grid-template-areas: "main insp"; }
+	.marketp.money { --insp-w: 400px; grid-template-areas: "main pay"; }
+	.marketp.off { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; }
+	.marketp .list-pane { grid-area: main; }
+	.marketp .pay-pane { grid-area: pay; }
+	.marketp .pane-head { min-width: 0; overflow: hidden; }
+	.marketp .pane-head > .hud-label { flex: none; white-space: nowrap; }
+	.marketp .pane-head .dim { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.marketp .pane-body.paused { opacity: 0.55; }
+
+	/* scope row: readouts on the left, the marketplace LCD chips on the right */
+	.marketp .mkt-scope { flex: none; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; padding: 10px 10px 0; }
+	.marketp .mkt-scope .sp { flex: 1; }
+	.marketp .mkt-scope .readout, .marketp .pay-read .readout { min-width: 0; }
+	.marketp .mkt-scope .readout { min-width: 200px; }
+	.marketp .mkt-scope .readout .big, .marketp .pay-read .readout .big { font: 500 18px/1.15 var(--mono); letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.marketp .mkt-scope .readout .big.dim, .marketp .pay-read .readout .big.dim { color: var(--lcd-dim); font-size: 15px; }
+	.marketp .mkt-scope .readout .big.loading { color: var(--lcd-dim); }
+	.marketp .shops { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; min-width: 0; }
+	.marketp .shops.left { justify-content: flex-start; }
+	.marketp .mkt-shop { display: inline-flex; align-items: center; gap: 6px; height: 22px; max-width: 100%; padding: 0 8px; border-radius: var(--r2); background: var(--lcd); background-image: var(--scan); color: var(--lcd-dim); font: 500 10.5px var(--mono); box-shadow: inset 0 0 0 1px var(--lcd-line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.marketp .mkt-shop i { width: 6px; height: 6px; border-radius: 50%; background: var(--lcd-live); flex: none; }
+	.marketp .mkt-shop.hand i { background: transparent; box-shadow: inset 0 0 0 1px var(--lcd-dim); }
+	.marketp .mkt-shop.off i { background: var(--lcd-dim); }
+	.marketp .mkt-shop.problem { color: var(--lcd-wait); font-weight: 600; }
+	.marketp .mkt-shop.problem i { background: var(--lcd-wait); }
+	.marketp a.mkt-shop:hover { color: var(--lcd-ink); }
+	.marketp .mkt-banner { flex: none; margin: 8px 10px 0; }
+	.marketp .mkt-banner a { color: var(--accent); }
+
+	/* listings table */
+	.marketp .lst-tbl { --cols: minmax(0, 1fr) 96px 72px 176px 88px 100px; }
+	.marketp .lst-tbl .prod { display: flex; align-items: center; gap: 6px; }
+	.marketp .lst-tbl .prod > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+	.marketp .lst-tbl .c-shop { color: var(--ink-2); font-size: 12px; }
+	.marketp .lst-tbl .c-at { font-size: 11px; color: var(--ink-3); }
+	.marketp .lst-tbl .c-7d { font-size: 11.5px; color: var(--ink-2); }
+	.marketp .mk-sm, .marketp .k-sm { display: none; }
+	.marketp .state-word.off { color: var(--ink-4); }
+	.marketp .state-word .glyph { font-size: 10px; }
+
+	/* the instrument: net tape */
+	.marketp .nettape { background: var(--lcd); background-image: var(--scan); border-radius: var(--r2); box-shadow: inset 0 0 0 1px var(--lcd-line); padding: 8px 10px 9px; color: var(--lcd-ink); font: 500 12px/1.5 var(--mono); }
+	.marketp .nettape .hd { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 5px; font: 500 9.5px/1.3 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--lcd-dim); }
+	.marketp .nettape .ln { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; color: var(--lcd-dim); }
+	.marketp .nettape .ln span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.marketp .nettape .ln b { font-weight: 500; color: var(--lcd-ink); text-align: right; white-space: nowrap; }
+	.marketp .nettape .ln.off b { color: var(--lcd-dim); }
+	.marketp .nettape .rule { border-top: 1px dashed var(--lcd-line); margin: 5px 0; }
+	.marketp .nettape .due { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 12px; }
+	.marketp .nettape .due .hud-label { color: var(--lcd-dim); }
+	.marketp .nettape .due b.est { font: 500 20px/1.2 var(--mono); letter-spacing: -0.01em; color: var(--lcd-ink); border-bottom: 1px dashed var(--lcd-dim); }
+	.marketp .nettape .note { margin-top: 2px; text-align: right; font: 400 10.5px/1.4 var(--ui); color: var(--lcd-dim); }
+	.marketp .nettape .rec { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: 12px; margin-top: 7px; padding-top: 6px; border-top: 1px solid var(--lcd-line); }
+	.marketp .nettape .rec .hud-label { color: var(--lcd-dim); }
+	.marketp .nettape .rec b { font-weight: 500; text-align: right; color: var(--lcd-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.marketp .nettape .rec b.dim { color: var(--lcd-dim); }
+
+	/* inspector bits */
+	.marketp .inspector .dev-p.note { font-size: 11px; color: var(--ink-3); }
+	.marketp .inspector .dev-p.ok { color: var(--ink-3); font-size: 11.5px; }
+	.marketp .why ul { margin: 4px 0 0; padding-left: 16px; }
+	.marketp .why li { margin: 2px 0; }
+	.marketp .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+	.marketp .label-chip.over { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+	.marketp .dev-row.file { padding: 4px 6px 4px 8px; }
+	.marketp .dev-row .role { flex: none; width: 76px; font: 500 9.5px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+	.marketp .dev-row .t.mono { font: 500 11px var(--mono); color: var(--ink-2); }
+	.marketp .dev-row .v.live { color: var(--live); }
+	.marketp .dev-row .rm { width: 20px; height: 20px; color: var(--ink-3); }
+	.marketp .dev-row .rm svg { width: 12px; height: 12px; }
+	.marketp .dev-row.golink { width: 100%; background: transparent; text-align: left; color: var(--ink); }
+	.marketp .dev-row.golink:hover { background: var(--raise); }
+	.marketp .addfile { display: flex; gap: 4px; flex-wrap: wrap; }
+	.marketp .addfile select { height: 24px; padding: 0 6px; font-size: 11.5px; min-width: 0; }
+	.marketp .addfile select:first-child { flex: 1; }
+
+	/* forms (the .fcard shape from hq.css) */
+	.marketp .fcard label.grow { flex: 1 1 120px; }
+	.marketp .fcard label.qty { flex: 0 0 92px; }
+	.marketp .fcard .row > label { min-width: 0; }
+	.marketp .fcard input.num { text-align: right; font-family: var(--mono); }
+	.marketp .fcard input:disabled { opacity: 0.5; }
+	.marketp .fcard textarea { font: 500 12px/1.5 var(--ui); color: var(--ink); text-transform: none; letter-spacing: 0; resize: vertical; min-height: 64px; }
+	.marketp .fcard .hint.err { color: var(--wait); }
+	.marketp .netcalc { align-self: flex-end; padding-bottom: 5px; font: 500 11px var(--mono); color: var(--ink-3); white-space: nowrap; }
+	.marketp .netcalc b { color: var(--ink); font-weight: 500; }
+	.marketp .pick-files { display: grid; gap: 3px; max-height: 176px; overflow: auto; overscroll-behavior: contain; padding: 2px; border: 1px solid var(--line); border-radius: var(--r2); background: var(--well); }
+	.marketp .pick { display: grid; grid-template-columns: auto minmax(0, 1fr) auto 100px; gap: 6px; align-items: center; padding: 2px 4px; }
+	.marketp .fcard .pick label { display: block; font: 500 11px var(--mono); letter-spacing: 0; text-transform: none; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.marketp .pick .v { font: 500 10px var(--mono); color: var(--ink-3); }
+	.marketp .pick .v.live { color: var(--live); }
+	.marketp .fcard .pick select { height: 22px; font-size: 11px; padding: 0 4px; }
+	.marketp .line-form { padding: 10px 10px 0; }
+	.marketp .line-form .fcard { background: var(--panel); }
+
+	/* products pool */
+	.marketp .ppool { --pool-min: 180px; }
+	.marketp .pcard.prod { cursor: pointer; padding: 6px; gap: 5px; }
+	.marketp .pcard.prod .thumb { aspect-ratio: 4 / 3; }
+	.marketp .pcard.prod .t { font-size: 12px; }
+	.marketp .pcard.prod .pr { font: 500 11px var(--mono); color: var(--ink-2); }
+	.marketp .pcard.prod.retired { opacity: 0.5; }
+	.marketp .pcard.prod.draft .thumb { border-style: dashed; }
+
+	/* money lines */
+	.marketp .line-tbl { --cols: 92px 72px minmax(0, 1fr) 70px 62px 70px 70px 96px; }
+	.marketp .line-tbl .c-when { font-size: 11px; color: var(--ink-3); }
+	.marketp .line-tbl .kind { font: 500 10.5px var(--mono); color: var(--ink-3); }
+	.marketp .line-tbl .k-refund .kind { color: var(--ink); }
+	.marketp .line-tbl .c-f { color: var(--ink-3); }
+	.marketp .line-tbl .c-ref { font-size: 11px; color: var(--ink-3); }
+	.marketp .line-tbl .c-src { font-size: 11px; color: var(--ink-3); }
+	.marketp .line-tbl .tbl-row { cursor: default; }
+	.marketp .line-tbl .tbl-row.struck > span:not(.c-src) { color: var(--ink-4); text-decoration: line-through; text-decoration-color: var(--ink-4); }
+	.marketp .line-tbl .tbl-row.struck .kind { color: var(--ink-4); }
+	.marketp .empty.unknown { font-family: var(--mono); font-size: 11.5px; border-bottom: 1px dashed var(--line); }
+
+	/* payouts */
+	.marketp .pay-read { flex: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 6px; padding: 10px 10px 0; }
+	.marketp .pay-list { display: grid; gap: 6px; padding: 10px; align-content: start; }
+	.marketp .pay { position: relative; display: grid; gap: 4px; padding: 8px 10px 9px; border: 1px solid var(--line); border-radius: var(--r3); background: var(--panel); cursor: pointer; }
+	.marketp .pay:hover { background: color-mix(in srgb, var(--ink) 3%, var(--panel)); }
+	.marketp .pay.sel { background: var(--raise-2); }
+	.marketp .pay.sel::before { content: ""; position: absolute; inset-block-start: -1px; inset-inline-start: 10px; width: 18px; height: 2px; border-radius: 0 0 2px 2px; background: var(--accent); pointer-events: none; }
+	.marketp .pay .ph { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+	.marketp .pay .ph .sp { flex: 1; }
+	.marketp .pay .amt { font: 500 16px/1.2 var(--mono); letter-spacing: -0.01em; }
+	.marketp .pay .ccy { font: 500 10px var(--mono); color: var(--ink-3); }
+	.marketp .pay .pm { font-size: 11.5px; color: var(--ink-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.marketp .pay .facts { margin-top: 4px; padding-top: 6px; }
+	.marketp .pay .dev-p { font-size: 11.5px; }
+	.marketp .pay.confirmed .amt { color: var(--ink-2); }
+	.marketp .pay-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px; margin-top: 4px; }
+	.marketp .pay-form label { display: grid; gap: 3px; font: 500 10px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+	.marketp .pay-form input { height: 26px; padding: 0 8px; font: 500 12px var(--mono); color: var(--ink); letter-spacing: 0; text-transform: none; }
+	.marketp .pay-note { padding: 0 10px 12px; font-size: 11px; color: var(--ink-3); }
+
+	@media (max-width: 1100px) {
+		.marketp, .marketp.money { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); grid-template-areas: "main"; }
+		.marketp.money { grid-template-rows: minmax(0, 1.4fr) minmax(0, 1fr); grid-template-areas: "main" "pay"; }
+	}
+	@media (max-width: 720px) {
+		.marketp .lst-tbl { --cols: minmax(0, 1fr) 64px 118px; }
+		.marketp .lst-tbl .c-shop, .marketp .lst-tbl .c-at, .marketp .lst-tbl .c-7d { display: none; }
+		.marketp .lst-tbl .mk-sm { display: inline; flex: none; font: 500 10px var(--mono); color: var(--ink-3); }
+		.marketp .line-tbl { --cols: 76px minmax(0, 1fr) 70px; }
+		.marketp .line-tbl .c-kind, .marketp .line-tbl .c-g, .marketp .line-tbl .c-f, .marketp .line-tbl .c-ref, .marketp .line-tbl .c-src { display: none; }
+		.marketp .line-tbl .k-sm { display: inline; font: 500 10px var(--mono); color: var(--ink-3); }
+		.marketp .ppool { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		.marketp .mkt-scope .readout { min-width: 0; flex: 1 1 150px; }
+		.marketp .shops { justify-content: flex-start; }
+		.marketp .pick { grid-template-columns: auto minmax(0, 1fr) 92px; }
+		.marketp .pick .v { display: none; }
+	}
+	/* app additions */
+	.marketp .confirm { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+	.marketp .confirm .q { font-size: 11.5px; color: var(--ink-2); }
+	.marketp button.mkt-shop { border: 0; cursor: pointer; }
+	.marketp .crumb-sep { color: var(--ink-4); }
+	.marketp .linkish { padding: 0; border: 0; color: var(--ink-2); text-decoration: underline; background: none; }
+	.marketp .pay-list > .btn { justify-self: start; }
+}

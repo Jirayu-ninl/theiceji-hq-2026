@@ -1,0 +1,30 @@
+{
+  "name": "@theiceji/hq-assets",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "HQ Assets: every file HQ keeps, in R2 or the owner’s Google Drive — upload (prepare → finalize), access URLs, collections, tags, and the frozen ready state. Framework-free; on @theiceji/hq-ops, @theiceji/hq-core and @theiceji/hq-storage.",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "bun test test",
+    "verify": "bunx biome ci . && bunx tsc --noEmit",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "dependencies": {
+    "@theiceji/hq-core": "workspace:*",
+    "@theiceji/hq-db": "workspace:*",
+    "@theiceji/hq-ops": "workspace:*",
+    "@theiceji/hq-storage": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.13",
+    "@types/bun": "^1.4.2",
+    "@types/node": "^26.5.1",
+    "typescript": "^7.0.2"
+  }
+}

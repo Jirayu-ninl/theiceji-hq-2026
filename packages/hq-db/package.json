@@ -1,0 +1,26 @@
+{
+  "name": "@theiceji/hq-db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "HQ data layer \u2014 the Postgres schema (Drizzle), the connection factory, and the access-token primitives shared by apps/hq (OAuth authorization server) and apps/hq-mcp (resource server).",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts",
+    "./enums": "./src/enums.ts",
+    "./scopes": "./src/access/scopes.ts",
+    "./access": "./src/access/index.ts",
+    "./readiness": "./src/readiness.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.1",
+    "typescript": "^7.0.2"
+  }
+}

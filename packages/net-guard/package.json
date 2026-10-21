@@ -1,0 +1,22 @@
+{
+  "name": "@theiceji/net-guard",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Outbound fetches of URLs someone else chose: public destinations only, the validated address pinned to the connection (TLS still checks the hostname), no redirects, streamed byte caps and timeouts.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "bun test test",
+    "verify": "bunx biome ci . && bunx tsc --noEmit",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.13",
+    "@types/bun": "^1.4.2",
+    "@types/node": "^26.5.1",
+    "typescript": "^7.0.2"
+  }
+}

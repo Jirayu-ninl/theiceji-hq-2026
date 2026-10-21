@@ -1,0 +1,30 @@
+{
+  "name": "agent-runner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "HQ's builtin agent runner (runner = builtin): claims the routines the owner gave to HQ itself, runs Claude with the owner's LLM key over the same tools the MCP server offers (in-process, scope-checked per call), holds budget before every turn, and leaves proposals for the Inbox. Runs on the owner's machine beside the worker — never on Vercel (a run outlasts a function).",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "once": "bun run src/index.ts --once",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "lint": "biome check",
+    "test": "bun test test"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
+    "@theiceji/hq-agents": "workspace:*",
+    "@theiceji/hq-core": "workspace:*",
+    "@theiceji/hq-db": "workspace:*",
+    "@theiceji/hq-ops": "workspace:*",
+    "@theiceji/mcp-kernel": "workspace:*",
+    "hq-mcp": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.13",
+    "@types/bun": "^1.4.2",
+    "typescript": "^7.0.2"
+  }
+}

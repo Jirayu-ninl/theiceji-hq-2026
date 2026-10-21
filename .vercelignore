@@ -1,0 +1,16 @@
+# Build/cache artifacts — regenerated remotely, must not be uploaded
+.turbo
+**/.turbo
+**/.next
+**/dist
+
+# Not part of any deployed app.
+# NEVER list a bun workspace dir here (apps/*, packages/*): a missing
+# workspace changes bun.lock → `bun install --frozen-lockfile` fails on Vercel.
+docs
+.claude
+
+# Local-only
+**/*.log
+**/.env
+**/.env.local

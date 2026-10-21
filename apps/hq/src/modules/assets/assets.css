@@ -1,0 +1,82 @@
+/* Assets (/p/<slug>/assets, /assets) — Pool + Inspector.
+   Instrument: the viewer's timecode · dimensions · bytes strip. Everything else is plain SaaS. */
+@scope (html) to (.legacy) {
+	.assetsp { --insp-w: min(var(--size-insp-assets, 340px), 50vw); grid-template-columns: minmax(0, 1fr) var(--insp-w); grid-template-areas: "main insp"; }
+	.pool-pane { grid-area: main; }
+	.pool-pane.paused .pane-body { opacity: 0.55; }
+	.pool-pane .toolbar .field { display: inline-flex; align-items: center; gap: 5px; font: 500 10px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+	.pool-pane .toolbar select { max-width: 170px; }
+	.tagchips { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+	.tagchips .label-chip { cursor: pointer; position: relative; }
+	.tagchips .label-chip:hover { color: var(--ink); }
+	.tagchips .label-chip[aria-pressed="true"] { color: var(--ink); background: var(--raise-2); box-shadow: inset 0 0 0 1px var(--accent); }
+
+	/* grid */
+	.apool { --pool-min: 168px; }
+	.apool .mdrop { min-height: 100%; cursor: pointer; gap: 2px; }
+	.apool .mdrop .big { font-size: 22px; line-height: 1; color: var(--ink-2); }
+	.apool .mdrop small { color: var(--ink-4); }
+	.acard { padding: 6px; gap: 5px; cursor: pointer; }
+	.acard .thumb { aspect-ratio: 4 / 3; }
+	.acard .t { font-size: 12px; }
+	.acard .m .tag { font-size: 10.5px; }
+	.acard.rejected { opacity: 0.5; }
+	.acard.pending .thumb { border-style: dashed; }
+	.prog.indet i { width: 100%; opacity: 0.3; }
+
+	/* list */
+	.pool-pane .tbl { --cols: minmax(0, 1fr) 60px 100px 80px 130px 110px; }
+	.pool-pane .tbl.with-project { --cols: 130px minmax(0, 1fr) 60px 100px 80px 130px 110px; }
+	.pool-pane .tbl-row .name { display: flex; align-items: center; gap: 6px; }
+	.pool-pane .tbl-row .c-kind, .pool-pane .tbl-row .c-size { font: 500 11px var(--mono); color: var(--ink-3); }
+	.pool-pane .tbl-row .c-coll { color: var(--ink-2); font-size: 11.5px; }
+	.pool-pane .tbl-row.rejected { opacity: 0.5; }
+	.pool-pane .tbl-row .prog { width: 60px; flex: none; }
+
+	/* collections */
+	.cpool { --pool-min: 200px; }
+	.ccard { cursor: pointer; gap: 6px; }
+	.ccard .quad { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+	.ccard .quad .thumb { aspect-ratio: 4 / 3; font-size: 8px; }
+	.ccard .quad .thumb.blank { background: var(--well); border-style: dashed; }
+	.ccard .n { font: 500 11px var(--mono); color: var(--ink-3); }
+
+	/* inspector: viewer = the instrument */
+	.viewer { display: grid; place-items: center; padding: 8px; background: var(--viewer); border: 1px solid var(--line-2); border-radius: var(--r3); box-shadow: inset 0 1px 0 var(--lcd-line); }
+	.viewer .thumb { width: 100%; max-height: 220px; }
+	.viewer .thumb.portrait { width: auto; height: 220px; }
+	.viewer .thumb.square { width: 200px; }
+	.viewer .thumb .tc { font-size: 10px; padding: 2px 5px; right: 6px; bottom: 6px; }
+	.strip { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 3px; margin-top: 4px; }
+	.strip .thumb { border-radius: 2px; }
+	.strip .thumb > span:first-child { display: none; }
+	.strip .thumb .tc { font-size: 8px; right: 2px; bottom: 2px; padding: 0 3px; }
+	.status-line { display: flex; align-items: center; gap: 8px; }
+	.status-line .prog { flex: 1; }
+	.inspector .facts .label-chip { margin: 0 3px 2px 0; }
+	.inspector .field { display: grid; gap: 3px; font: 500 10px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+	.inspector .field select { height: 26px; padding-block: 0; font: 500 12px var(--ui); color: var(--ink); text-transform: none; letter-spacing: 0; }
+	.inspector .refs { display: flex; flex-wrap: wrap; gap: 6px; }
+	.inspector .tagform { display: flex; gap: 4px; }
+	.inspector .tagform input { flex: 1; height: 26px; padding: 0 8px; font-size: 12px; }
+	.inspector .dev-p.note { font-size: 11px; color: var(--ink-3); }
+	.inspector .path { font: 500 10.5px var(--mono); color: var(--ink-3); word-break: break-all; margin: 0; }
+
+	@media (max-width: 1100px) { .assetsp { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; } }
+	@media (max-width: 720px) {
+		.apool { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		.pool-pane .tbl { --cols: minmax(0, 1fr) 60px 100px; }
+		.pool-pane .tbl.with-project { --cols: 100px minmax(0, 1fr) 60px 100px; }
+		.pool-pane .tbl .c-size, .pool-pane .tbl .c-bytes, .pool-pane .tbl .c-coll { display: none; }
+	}
+	.inspector .labels { display: flex; flex-wrap: wrap; gap: 4px; }
+	.acard .thumb img, .viewer .thumb img { border-radius: inherit; }
+	.pool-pane .toolbar .field select { height: 24px; }
+	.ccard { text-align: left; }
+
+	/* the selected collection: four of its files on the viewer; what can't be removed says why where the buttons would be */
+	.cviewer .quad { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; width: 100%; }
+	.cviewer .quad .thumb { aspect-ratio: 4 / 3; max-height: none; font-size: 9px; }
+	.cviewer .quad .thumb.blank { background: var(--well); border-style: dashed; }
+	.inspector .dev-acts .why-not { flex-basis: 100%; margin: 0; font-size: 11px; color: var(--ink-3); }
+}

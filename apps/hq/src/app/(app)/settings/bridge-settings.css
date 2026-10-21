@@ -1,0 +1,101 @@
+/* HQ · Bridge — Settings: one document pane of Group cards (title · description · body rows · footer bar).
+   Plain SaaS on purpose: the only LCD is the readout bar that states the live values. Tokens only; flat cards, no shadow.
+   Scoped like globals.css, so nothing here reaches a `.legacy` subtree. */
+@scope (html) to (.legacy) {
+	.settingsp { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; }
+	.settings-pane { grid-area: main; }
+	.settings-doc { max-width: 840px; margin: 0 auto; padding: 14px 16px 48px; display: grid; gap: 12px; }
+	.settings-doc > .readout { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; padding: 8px 12px; }
+	.settings-doc > .readout .k { font: 500 10px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--lcd-dim); margin-right: 6px; }
+	.settings-doc > .readout .v { font: 500 12px var(--mono); color: var(--lcd-ink); }
+	.settings-doc > .readout .v.wait { color: var(--lcd-wait); } .settings-doc > .readout .v.live { color: var(--lcd-live); } .settings-doc > .readout .v.accent { color: var(--lcd-accent); }
+	.settings-doc > .why { margin: 0; }
+
+	/* group card */
+	.group { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r3); min-width: 0; scroll-margin-top: 12px; }
+	.group.problem { border-color: color-mix(in srgb, var(--wait) 45%, var(--line)); }
+	.group-head { display: grid; gap: 2px; padding: 12px 14px 4px; }
+	.group-head h2 { margin: 0; font: 600 13.5px/1.3 var(--ui); display: flex; align-items: center; gap: 8px; }
+	.group-head p { margin: 0; font-size: 12px; color: var(--ink-2); }
+	.group-body { display: grid; gap: 1px; padding: 8px 6px; min-width: 0; }
+	.fld { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 3px 16px; align-items: center; padding: 7px 8px; border-radius: var(--r2); }
+	.fld .k { font: 500 12.5px var(--ui); color: var(--ink); }
+	.fld .k small { display: block; font-size: 11px; color: var(--ink-3); line-height: 1.35; }
+	.fld .c { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+	.fld .c input[type="text"], .fld .c input[type="password"], .fld .c input[type="email"], .fld .c input[type="url"], .fld .c input[type="search"] { height: 26px; font: 500 12px var(--ui); min-width: 220px; }
+	.fld .c input[type="datetime-local"] { height: 26px; font: 500 12px var(--mono); }
+	.fld .c input.num { min-width: 0; width: 120px; font-family: var(--mono); text-align: right; }
+	.fld .c select { height: 26px; padding: 0 6px; font: 500 12px var(--ui); }
+	.fld .c .hint { flex-basis: 100%; font-size: 11px; color: var(--ink-3); margin: 0; }
+	.fld .c .hint.wait { color: var(--wait); }
+	.fld .c .state-word { margin-left: 2px; }
+	.fld.locked .k { color: var(--ink-2); }
+	.fld .c .avatar { margin: 0; cursor: default; }
+	.group-foot { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-top: 1px solid var(--line); background: var(--panel-head); border-radius: 0 0 var(--r3) var(--r3); flex-wrap: wrap; }
+	.group-foot .st { margin-left: auto; font: 500 10.5px var(--mono); color: var(--ink-3); }
+	.group-foot .st.wait { color: var(--wait); }
+	.group-foot .st.saved { color: var(--live); }
+	.group-foot a.lnk, .fld a.lnk, .dev-row a.lnk { text-decoration: underline; text-underline-offset: 2px; }
+
+	/* lists inside groups */
+	.group .dev-rows { padding: 2px 8px; }
+	.fld .c .dev-rows { flex: 1; padding: 0; min-width: 0; }
+	.dev-row .v.live { color: var(--live); }
+	/* a settings line is a sentence: it wraps rather than cuts, and its meta drops under it when narrow */
+	.settings-doc .dev-row { flex-wrap: wrap; }
+	.settings-doc .dev-row .t { white-space: normal; }
+	.group .tbl { margin: 0 8px; border: 1px solid var(--line); border-radius: var(--r2); overflow: hidden; }
+	.group .tbl-head { min-height: 26px; }
+	.group .tbl-row { min-height: 34px; }
+	.group .tbl .mono { font: 500 11px var(--mono); color: var(--ink-3); }
+	.group .tbl .acts { display: flex; gap: 4px; justify-content: flex-end; }
+	.group .tbl .num.unknown { color: var(--ink-3); }
+	.conn-tbl { --cols: 170px minmax(0, 1fr) 150px; }
+	.conn-tbl.prov-tbl { --cols: 190px minmax(0, 1fr) 140px auto; }
+	.fcard textarea.mono { font: 500 11px/1.5 var(--mono); }
+	.mcp-tbl { --cols: 170px minmax(0, 1fr) 110px 150px; }
+	.store-tbl { --cols: minmax(0, 1.2fr) 110px minmax(0, 1fr) 150px; }
+	.sys-tbl { --cols: 150px minmax(0, 1fr) 130px; }
+	.oauth-facts { margin: 0 8px 6px; }
+	.oauth-facts dd { user-select: all; }
+	.group .facts.plain { margin: 0 8px 4px; }
+	.why.ok { background: color-mix(in srgb, var(--live) 10%, transparent); }
+	.why.info { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+	.group-body > .why { margin: 0 8px; }
+	.kill { display: inline-flex; align-items: center; gap: 8px; }
+	.kill .state-word { min-width: 34px; }
+
+	/* an irreversible row action asks once, in place */
+	.confirm { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+	.confirm .q { font-size: 11.5px; color: var(--ink-2); }
+
+	/* a reason the kernel asks for before a switch moves */
+	.reason { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex-basis: 100%; }
+	.reason input[type="text"] { flex: 1; min-width: 180px; }
+
+	/* Connections: endpoint, setup steps, snippets, the one-time token */
+	.snippet { flex: 1; min-width: 0; margin: 0; padding: 5px 8px; background: var(--well); border: 1px solid var(--line); border-radius: var(--r2); font: 500 11px/1.5 var(--mono); color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+	.steps { flex-basis: 100%; margin: 0; padding-left: 18px; font-size: 12px; color: var(--ink-2); }
+	.steps li { margin: 1px 0; }
+	.chips-row { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
+	.group-body > .fcard { margin: 4px 8px; }
+	.fcard input[type="text"] { min-width: 0; }
+	.fcard fieldset { margin: 0; padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--r2); min-width: 0; }
+	.fcard legend { padding: 0 4px; }
+	.scope-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 6px; }
+	.fcard .scope-row { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 8px; align-items: baseline; padding: 3px 0; font: 400 12px var(--ui); letter-spacing: 0; text-transform: none; color: var(--ink); }
+	.fcard .scope-row small { display: block; color: var(--ink-3); }
+	.fcard .scope-row .lvl { font: 500 10px var(--mono); color: var(--ink-3); }
+	.settings-doc input[type="checkbox"] { appearance: auto; width: 14px; height: 14px; margin: 0; padding: 0; accent-color: var(--ink); }
+	.scope-head { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+	.scope-head .n { margin-left: auto; font: 500 10px var(--mono); color: var(--ink-3); }
+
+	@media (max-width: 720px) {
+		.settings-doc { padding: 10px 8px 48px; }
+		.fld { grid-template-columns: minmax(0, 1fr); }
+		.fld .c input[type="text"], .fld .c input[type="password"], .fld .c input[type="email"], .fld .c input[type="url"], .fld .c input[type="search"] { min-width: 0; flex: 1; }
+		.conn-tbl, .mcp-tbl, .store-tbl, .sys-tbl { --cols: minmax(0, 1fr) 110px; }
+		.conn-tbl.prov-tbl { --cols: minmax(0, 1fr) 100px auto; }
+		.group .tbl .c-hide { display: none; }
+	}
+}

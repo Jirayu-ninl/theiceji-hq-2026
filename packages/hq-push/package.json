@@ -1,0 +1,27 @@
+{
+  "name": "@theiceji/hq-push",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Web Push for HQ's devices — the push_subscriptions store and the VAPID fan-out. Framework-free; used by apps/hq (subscribe, Settings, alerts for urgent requests).",
+  "exports": {
+    ".": "./src/index.ts",
+    "./send": "./src/send.ts",
+    "./store": "./src/store.ts",
+    "./types": "./src/types.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@theiceji/hq-db": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "web-push": "^3.6.7",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.1",
+    "@types/web-push": "^3.6.4",
+    "typescript": "^7.0.2"
+  }
+}

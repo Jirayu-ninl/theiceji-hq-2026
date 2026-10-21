@@ -1,0 +1,23 @@
+/* Inbox (/inbox) — one queue of human requests, proposals and connection problems beside an inspector.
+   Queue + Inspector from the panel grammar. */
+@scope (html) to (.legacy) {
+	.inboxp { --insp-w: min(var(--size-insp-inbox, 380px), 50vw); grid-template-columns: minmax(0, 1fr) var(--insp-w); grid-template-areas: "main insp"; }
+	.queue-pane { grid-area: main; }
+	.queue-pane .item .age.old { color: var(--wait); }
+	.kindlabel { font: 500 10px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+	.kindlabel.proposal { color: var(--live); } .kindlabel.problem { color: var(--accent); } .kindlabel.request { color: var(--wait); }
+	.inspector .item-title { font: 500 15px/1.35 var(--ui); margin: 0; }
+	.inspector .item-body { margin: 0; color: var(--ink-2); font-size: 12.5px; line-height: 1.5; }
+	.inspector .acts { display: flex; flex-wrap: wrap; gap: 6px; }
+	.inspector .quote { font-size: 12.5px; }
+	.inspector .why { margin: 0; }
+	.inspector .note-field { width: 100%; min-height: 56px; resize: vertical; font-size: 12px; }
+	.calm { display: grid; place-items: center; height: 100%; min-height: 240px; color: var(--ink-3); text-align: center; gap: 6px; padding: 24px; }
+	.calm b { font: 500 16px var(--ui); color: var(--ink-2); }
+	.calm p { margin: 0; font-size: 12px; max-width: 320px; }
+	.toolbar .who-filter { display: inline-flex; gap: 2px; padding: 2px; background: var(--well); border: 1px solid var(--line); border-radius: var(--r2); flex-wrap: wrap; }
+	.toolbar .who-filter a { height: 20px; padding: 0 8px; font: 500 11px var(--ui); color: var(--ink-3); border-radius: 3px; display: inline-flex; align-items: center; gap: 5px; }
+	.toolbar .who-filter a:hover { color: var(--ink); background: var(--raise); }
+	.toolbar .who-filter a[aria-current] { color: var(--ink); background: var(--raise-2); }
+	@media (max-width: 1100px) { .inboxp { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; } }
+}

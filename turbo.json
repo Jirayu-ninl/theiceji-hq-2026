@@ -1,0 +1,48 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**"
+      ],
+      "env": [
+        "NODE_ENV",
+        "VERCEL_GIT_COMMIT_SHA",
+        "DATABASE_URL",
+        "DATABASE_POOL_MAX",
+        "DATABASE_MIGRATE_URL",
+        "NEXT_PUBLIC_VAPID_PUBLIC_KEY",
+        "VAPID_PUBLIC_KEY",
+        "VAPID_PRIVATE_KEY",
+        "VAPID_SUBJECT",
+        "OAUTH_ISSUER",
+        "MCP_RESOURCE_URLS",
+        "R2_ACCOUNT_ID",
+        "R2_ACCESS_KEY_ID",
+        "R2_SECRET_ACCESS_KEY",
+        "R2_BUCKET",
+        "R2_PUBLIC_URL",
+        "R2_ENDPOINT",
+        "CRON_SECRET"
+      ]
+    },
+    "lint": {
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "check": {},
+    "typecheck": {},
+    "verify": {}
+  }
+}

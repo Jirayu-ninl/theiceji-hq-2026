@@ -1,0 +1,30 @@
+{
+  "name": "worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "HQ local worker — claims jobs from the modules' manifests (a Story scene's ZIP today) over HQ's MCP server with a lease and a fencing token, moving bytes only through the URLs HQ signs.",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "once": "bun run src/index.ts --once",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "lint": "biome check",
+    "test": "bun test test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "2.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.13",
+    "@theiceji/hq-assets": "workspace:*",
+    "@theiceji/hq-core": "workspace:*",
+    "@theiceji/hq-db": "workspace:*",
+    "@theiceji/hq-ops": "workspace:*",
+    "@theiceji/hq-story": "workspace:*",
+    "@theiceji/mcp-kernel": "workspace:*",
+    "@types/bun": "^1.4.2",
+    "drizzle-orm": "^0.45.2",
+    "hq-mcp": "workspace:*",
+    "typescript": "^7.0.2"
+  }
+}

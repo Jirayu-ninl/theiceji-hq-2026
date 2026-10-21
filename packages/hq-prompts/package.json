@@ -1,0 +1,30 @@
+{
+  "name": "@theiceji/hq-prompts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "HQ Prompts: the prompt library — prompts, each one text (a template whose <VARIANTS> are filled from options: the prompt's own and the library's; style, model hint, negative text, params) and example assets with the options they were made with. Framework-free; on @theiceji/hq-ops, @theiceji/hq-core and @theiceji/hq-assets.",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "bun test test",
+    "verify": "bunx biome ci . && bunx tsc --noEmit",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "dependencies": {
+    "@theiceji/hq-assets": "workspace:*",
+    "@theiceji/hq-core": "workspace:*",
+    "@theiceji/hq-db": "workspace:*",
+    "@theiceji/hq-ops": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.13",
+    "@types/bun": "^1.4.2",
+    "@types/node": "^26.5.1",
+    "typescript": "^7.0.2"
+  }
+}

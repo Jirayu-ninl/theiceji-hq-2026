@@ -1,0 +1,181 @@
+/* Home · Time (/?view=time) — arrange (ruler + tracks grouped by project) over a three-pane rack.
+   Page layout only; tokens and shared parts (.pane, .item, .vu, .facts, .glyph, .btn) live in
+   app/globals.css. Items carry the PROJECT colour (--project on the group) at --tint; a module is a glyph, never a hue.
+   Selected = an overlay ring (::before / box-shadow), never a one-sided border. Class names carry a tl- prefix because
+   board.css and the settings pages already own bare .lane / .group, and every stylesheet stays loaded once visited. */
+@scope (html) to (.legacy) {
+	.page.time { grid-template-rows: minmax(0, 1fr) 236px; grid-template-columns: minmax(0, 1fr); --lbl-w: 216px; --now: 0; --today: -1; }
+	.page.time[aria-busy="true"] .tl-body { opacity: 0.6; }
+
+	/* ---------- arrange ---------- */
+	.tl-arrange { display: flex; flex-direction: column; }
+	.tl-tracks { flex: 1; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; position: relative; scrollbar-gutter: stable; outline-offset: -2px; }
+
+	/* ruler (sticky inside the scroll) */
+	.tl-ruler { position: sticky; top: 0; z-index: 6; display: grid; grid-template-columns: var(--lbl-w) minmax(0, 1fr); height: 28px; background: var(--panel-head); border-bottom: 1px solid var(--line); }
+	.tl-corner { display: flex; align-items: center; gap: 6px; padding: 0 8px 0 6px; border-right: 1px solid var(--line); min-width: 0; overflow: hidden; white-space: nowrap; }
+	.tl-transport { display: inline-flex; gap: 2px; flex: none; }
+	.tl-transport a { width: 18px; height: 18px; padding: 0; border-radius: var(--r1); border: 1px solid var(--line-2); font: 500 9px/1 var(--mono); color: var(--ink-2); display: grid; place-items: center; }
+	.tl-transport a:hover { background: var(--raise); color: var(--ink); }
+	.tl-transport .today { font-size: 10px; }
+	.tl-transport .today.on { color: var(--accent); }
+	.tl-week { font: 500 11px var(--ui); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+	.tl-week b { font: 600 10.5px var(--mono); color: var(--ink); }
+	.tl-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); min-width: 0; }
+	.tl-day { position: relative; display: flex; align-items: center; padding: 0 8px; border-left: 1px solid var(--line); font: 500 11px var(--ui); color: var(--ink-2); overflow: hidden; white-space: nowrap; }
+	.tl-day:first-child { border-left: 0; }
+	.tl-day .d-s { display: none; }
+	.tl-day.past { color: var(--ink-4); }
+	.tl-day.today { color: var(--ink); font-weight: 600; }
+	.tl-day.today::before { content: ""; position: absolute; left: 8px; right: 8px; bottom: 0; height: 2px; background: var(--accent); pointer-events: none; }
+	.tl-now-flag { position: absolute; top: 4px; left: calc(var(--lbl-w) + (100% - var(--lbl-w)) * var(--now)); transform: translateX(-50%); padding: 0 5px; border-radius: var(--r1); background: var(--wait); color: var(--panel); font: 600 9.5px/15px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; pointer-events: none; }
+	.tl-now-flag::after { content: ""; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 4px solid transparent; border-top: 5px solid var(--wait); border-bottom: 0; }
+
+	/* body + playhead */
+	.tl-body { position: relative; }
+	.tl-playhead { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--wait); left: calc(var(--lbl-w) + (100% - var(--lbl-w)) * var(--now)); z-index: 4; pointer-events: none; }
+	.tl-body > .empty { padding: 14px 12px; }
+
+	/* groups (one per project) */
+	.tl-group { border-bottom: 1px solid var(--line); }
+	.tl-ghead { display: grid; grid-template-columns: var(--lbl-w) minmax(0, 1fr); height: 28px; background: var(--panel-head); }
+	.tl-gth { display: flex; align-items: center; gap: 7px; padding: 0 8px 0 4px; border-right: 1px solid var(--line); min-width: 0; white-space: nowrap; }
+	.tl-fold { width: 18px; height: 18px; padding: 0; color: var(--ink-3); font-size: 10px; display: grid; place-items: center; border-radius: var(--r1); flex: none; }
+	.tl-fold:hover { background: var(--raise); color: var(--ink); }
+	.tl-gth .dot { width: 7px; height: 7px; }
+	.tl-gname { font: 600 12.5px var(--ui); color: var(--ink); overflow: hidden; text-overflow: ellipsis; padding: 2px 4px; margin: 0 -4px; border-radius: var(--r1); min-width: 0; }
+	.tl-gname:hover { background: var(--raise); }
+	.tl-gkind { font: 500 10px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); flex: none; }
+	.tl-gstat { margin-left: auto; font: 500 10px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); flex: none; }
+	.tl-glane { display: flex; align-items: center; padding: 0 10px; font: 500 10.5px var(--mono); color: var(--ink-4); min-width: 0; overflow: hidden; white-space: nowrap; }
+	.tl-group.paused .tl-glanes { opacity: 0.45; }
+	.tl-group.paused .tl-gname { color: var(--ink-3); }
+	.tl-group.collapsed .tl-glanes { display: none; }
+
+	/* lanes */
+	.tl-track { display: grid; grid-template-columns: var(--lbl-w) minmax(0, 1fr); border-top: 1px solid var(--line); }
+	.tl-th { display: flex; align-items: center; gap: 8px; padding: 0 8px 0 30px; border-right: 1px solid var(--line); min-width: 0; background: var(--panel); }
+	.tl-mglyph { color: var(--ink-3); font-size: 11px; width: 12px; text-align: center; flex: none; }
+	.tl-mname { font: 500 12px var(--ui); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.tl-cnt { margin-left: auto; font: 500 10.5px var(--mono); color: var(--ink-4); }
+	.tl-lane { position: relative; overflow: hidden; min-width: 0; background-image: linear-gradient(90deg, var(--line) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--line) 45%, transparent) 1px, transparent 1px); background-size: calc(100% / 7) 100%, calc(100% / 28) 100%; background-position: -1px 0, -1px 0; }
+	.tl-lane::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(100% / 7 * var(--today)); width: calc(100% / 7); background: color-mix(in srgb, var(--ink) 3%, transparent); pointer-events: none; }
+	.tl-track.none { height: 32px; }
+	.tl-nothing { position: absolute; left: 10px; top: 0; line-height: 32px; font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+
+	/* items — every item is a button positioned in its lane */
+	.tl-lane > button { position: absolute; margin: 0; padding: 0; border: 0; border-radius: var(--r1); font: inherit; color: var(--ink); text-align: left; z-index: 1; }
+	.tl-lane > button:hover { z-index: 3; }
+	.tl-lane > button:focus-visible { z-index: 3; outline-offset: 1px; }
+	.tl-blk { height: 24px; padding: 0 6px; display: flex; align-items: center; gap: 4px; min-width: 6px; overflow: hidden; white-space: nowrap; font: 500 11px/1 var(--ui); background: color-mix(in srgb, var(--project) var(--tint), transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--project) 45%, transparent); }
+	.tl-blk:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--project) 80%, var(--ink)); }
+	.tl-blk .t { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+	.tl-blk .glyph { flex: none; }
+	.tl-blk .prog { display: block; position: absolute; left: 0; right: 0; bottom: 0; border-radius: 0; background: transparent; }
+	.tl-blk.st-doing::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--level, 0%); background: color-mix(in srgb, var(--live) 16%, transparent); pointer-events: none; }
+	.tl-blk.st-done { opacity: 0.5; }
+	.tl-blk.st-wait { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--wait) 24%, transparent) 0 5px, color-mix(in srgb, var(--wait) 9%, transparent) 5px 10px); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--wait) 55%, transparent); }
+	.tl-blk.st-wait:hover { box-shadow: inset 0 0 0 1px var(--wait); }
+	.tl-blk.st-plan { background: transparent; box-shadow: none; border: 1px dashed color-mix(in srgb, var(--project) 65%, var(--ink-3)); color: var(--ink-2); }
+	.tl-blk.st-plan:hover { border-style: solid; }
+	.tl-blk.narrow { padding: 0; justify-content: center; }
+	.tl-blk.narrow .glyph { font-size: 9px; }
+	.tl-lbl-out { position: absolute; display: inline-flex; align-items: center; gap: 4px; height: 24px; font: 500 10.5px/24px var(--ui); color: var(--ink-2); white-space: nowrap; pointer-events: none; z-index: 1; }
+	.tl-mark { height: 24px; display: inline-flex; align-items: center; gap: 6px; transform: translateX(-7px); padding: 0 2px; background: transparent; white-space: nowrap; }
+	.tl-mark i { width: 11px; height: 11px; flex: none; transform: rotate(45deg); border-radius: 2px; background: var(--project); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 20%, transparent); }
+	.tl-mark.st-done i { opacity: 0.55; }
+	.tl-mark.st-due i { background: transparent; box-shadow: inset 0 0 0 1.5px var(--accent); }
+	.tl-mark.st-wait i { background: var(--wait); box-shadow: none; }
+	.tl-mark.st-plan i { background: transparent; box-shadow: inset 0 0 0 1px var(--ink-3); }
+	.tl-mark.st-doing i { background: var(--live); box-shadow: none; }
+	.tl-mlbl { font: 500 10.5px var(--ui); color: var(--ink-2); white-space: nowrap; }
+	.tl-mark.st-done .tl-mlbl { color: var(--ink-3); }
+	.tl-mark.st-due .tl-mlbl, .tl-mark.st-wait .tl-mlbl { color: var(--ink); }
+	.tl-mark:hover .tl-mlbl { color: var(--ink); }
+	.tl-tick { width: 4px; height: 18px; transform: translateX(-2px); background: var(--project); border-radius: 1px; opacity: 0.8; }
+	.tl-tick::after { content: ""; position: absolute; inset: -3px -5px; }
+	.tl-tick.st-done { opacity: 0.55; }
+	.tl-tick.st-plan { background: transparent; box-shadow: inset 0 0 0 1px var(--ink-3); opacity: 1; }
+	.tl-tick.st-due { background: transparent; box-shadow: inset 0 0 0 1.5px var(--accent); opacity: 1; }
+	.tl-tick:hover { opacity: 1; }
+
+	/* selected = the 18×2 accent tick on the top edge, never an edge around it; a block also
+	   deepens its own tint, a mark or tick carries the tick above it */
+	.tl-lane > button.sel { z-index: 2; }
+	.tl-blk.sel { --tint: 30%; }
+	.tl-blk.sel::before, .tl-mark.sel::before, .tl-tick.sel::before { content: ""; position: absolute; top: 0; left: 5px; width: 18px; height: 2px; border-radius: 0 0 2px 2px; background: var(--accent); pointer-events: none; z-index: 1; }
+	.tl-blk.narrow.sel::before { left: 0; width: 100%; border-radius: 0; }
+	.tl-mark.sel::before { left: -3.5px; }
+	.tl-tick.sel { opacity: 1; }
+	.tl-tick.sel::before { top: -3px; left: calc(50% - 9px); }
+	.tl-mark.sel .tl-mlbl { color: var(--ink); }
+
+	/* ---------- rack ---------- */
+	.tl-rack { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1.1fr); gap: 3px; min-height: 0; }
+	.tl-rack > .pane { min-height: 0; }
+	.tl-waiting { outline-offset: -2px; }
+	.tl-waiting .item .t { font-size: 12px; }
+	.tl-waiting .item:not(.sel) .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.tl-money .pane-body { display: flex; gap: 12px; overflow: hidden; padding: 10px 10px 8px; }
+	.tl-rk { flex: var(--n) 1 0; min-width: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 6px; }
+	.tl-rk.bare { grid-template-rows: minmax(0, 1fr); }
+	.tl-rk + .tl-rk { padding-left: 12px; border-left: 1px dashed var(--line-2); }
+	.tl-rk-h { display: flex; align-items: baseline; gap: 8px; min-width: 0; white-space: nowrap; }
+	.tl-rk-h .dim { font: 500 10.5px var(--mono); color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; }
+	.tl-meters { display: grid; grid-template-columns: repeat(var(--n, 6), minmax(0, 1fr)); gap: 6px; min-height: 0; }
+	.tl-mtr { display: grid; grid-template-rows: minmax(0, 1fr) auto auto; gap: 4px; text-align: center; min-height: 0; min-width: 0; }
+	.tl-mtr .vu { min-height: 0; }
+	.tl-mtr .v { font: 600 11px var(--mono); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.tl-mtr .v.dim { color: var(--ink-3); font-weight: 500; }
+	.tl-mtr .l { display: flex; align-items: center; justify-content: center; gap: 5px; min-width: 0; font-size: 10.5px; color: var(--ink-3); white-space: nowrap; }
+	.tl-mtr .l span { overflow: hidden; text-overflow: ellipsis; }
+	/* the bar already wears the project colour; the dot returns when names drop (dense) */
+	.tl-mtr .l .dot { width: 5px; height: 5px; display: none; }
+	.tl-mtr.paused .vu, .tl-mtr.paused .v { opacity: 0.45; }
+	.tl-rk.dense .tl-meters { gap: 4px; }
+	.tl-rk.dense .tl-mtr .l span { display: none; }
+	.tl-rk.dense .tl-mtr .l .dot { display: inline-block; }
+	.tl-rk.dense .tl-mtr .v { font-size: 9.5px; }
+	.tl-money .pane-body > .empty { padding: 4px 2px; }
+	.tl-sbody { padding: 10px 12px 12px; display: grid; gap: 6px; align-content: start; }
+	.tl-stitle { display: flex; align-items: center; gap: 8px; min-width: 0; }
+	.tl-stitle .mod { font: 500 10.5px var(--mono); color: var(--ink-3); white-space: nowrap; }
+	.tl-stitle .glyph { margin-left: auto; }
+	.tl-sbody > .t { font-weight: 500; line-height: 1.35; overflow-wrap: anywhere; }
+	.tl-sbody > p { margin: 0; color: var(--ink-2); font-size: 12px; }
+	.tl-sbody .acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+	.tl-sbody .why { margin: 2px 0 0; }
+	.tl-sbody .facts { margin-top: 2px; }
+	.tl-sbody .facts dd { text-align: right; }
+	.tl-sbody .facts .st-wait { color: var(--wait); }
+	.tl-sbody .facts .st-doing { color: var(--live); }
+	.tl-sbody .facts .st-due { color: var(--accent); }
+	.tl-selected .empty kbd { margin: 0 1px; }
+
+	/* ---------- responsive ---------- */
+	@media (max-width: 1100px) {
+		.tl-rack { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+		.tl-money { display: none; }
+	}
+	@media (max-width: 720px) {
+		.page.time { --lbl-w: 90px; grid-template-rows: minmax(0, 1fr) 260px; }
+		.tl-rack { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
+		.tl-corner { padding: 0 4px; gap: 4px; }
+		.tl-week { display: none; }
+		.tl-day { padding: 0 4px; font-size: 10.5px; }
+		.tl-day .d-l { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+		.tl-day .d-s { display: inline; }
+		.tl-day.today::before { left: 4px; right: 4px; }
+		/* the flag drops under the ruler so the day label stays readable; labels beside marks and narrow blocks would
+		   collide, so they live in the tooltip and the Selected pane here */
+		.tl-now-flag { top: calc(100% + 4px); }
+		.tl-now-flag::after { top: auto; bottom: 100%; border-top: 0; border-bottom: 5px solid var(--wait); }
+		.tl-lbl-out, .tl-mlbl { display: none; }
+		.tl-mark { transform: translateX(-6px); padding: 0; }
+		.tl-th { padding-left: 8px; gap: 5px; }
+		.tl-cnt { display: none; }
+		.tl-gth { padding-left: 2px; gap: 5px; }
+		.tl-gkind, .tl-glane { display: none; }
+		.tl-gstat { margin-left: 4px; }
+	}
+}

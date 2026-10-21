@@ -1,0 +1,54 @@
+/* Quotes (/p/<slug>/quotes, /quotes) — Table + Inspector.
+   Instrument: the totals tape, an LCD of subtotal · VAT · withholding · total due. Everything else is plain SaaS. */
+@scope (html) to (.legacy) {
+	.quotesp { --insp-w: min(var(--size-insp-quotes, 420px), 50vw); grid-template-columns: minmax(0, 1fr) var(--insp-w); grid-template-areas: "main insp"; }
+	.list-pane { grid-area: main; }
+	.quote-tbl { --cols: 104px minmax(0, 1fr) minmax(0, 0.8fr) 84px 110px 96px; }
+	.quote-tbl.global { --cols: 120px 104px minmax(0, 1fr) minmax(0, 0.8fr) 84px 110px 96px; }
+	.quote-tbl .no { font: 500 11.5px var(--mono); color: var(--ink-2); }
+	.status-chips { display: inline-flex; gap: 2px; padding: 2px; background: var(--well); border: 1px solid var(--line); border-radius: var(--r2); }
+	.status-chips button { height: 20px; padding: 0 8px; font: 500 11px var(--ui); color: var(--ink-3); border-radius: 3px; border: 0; }
+	.status-chips button:hover { color: var(--ink); background: var(--raise); }
+	.status-chips button[aria-pressed="true"] { color: var(--ink); background: var(--raise-2); }
+	.pending-read { flex: none; display: flex; gap: 8px; padding: 10px 10px 0; }
+	.pending-read .readout { min-width: 220px; }
+	.pending-read .readout .big { font: 500 20px/1.1 var(--mono); }
+
+	/* the instrument: totals tape */
+	.tape { background: var(--lcd); background-image: var(--scan); border-radius: var(--r2); box-shadow: inset 0 0 0 1px var(--lcd-line); padding: 8px 10px; color: var(--lcd-ink); font: 500 12px/1.5 var(--mono); }
+	.tape .ln { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; color: var(--lcd-dim); }
+	.tape .ln b { font-weight: 500; color: var(--lcd-ink); text-align: right; }
+	.tape .ln.off b { color: var(--lcd-dim); }
+	.tape .rule { border-top: 1px dashed var(--lcd-line); margin: 5px 0; }
+	.tape .due { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 12px; }
+	.tape .due .hud-label { color: var(--lcd-dim); }
+	.tape .due b { font: 500 20px/1.2 var(--ui); letter-spacing: -0.01em; color: var(--lcd-accent); }
+	.tape .words { margin-top: 3px; text-align: right; font: 400 11px/1.4 var(--ui); color: var(--lcd-dim); }
+
+	/* the draft editor */
+	.lines { display: grid; gap: 4px; }
+	.line { display: grid; grid-template-columns: minmax(0, 1fr) 52px 56px 84px 22px; gap: 4px; align-items: start; }
+	.line input, .line textarea { height: 26px; font: 500 12px var(--ui); padding: 4px 6px; min-width: 0; }
+	.line textarea { height: auto; min-height: 26px; resize: vertical; }
+	.line input.num { text-align: right; font-family: var(--mono); }
+	.line .rm { width: 22px; height: 26px; padding: 0; color: var(--ink-3); }
+	.line-head { display: grid; grid-template-columns: minmax(0, 1fr) 52px 56px 84px 22px; gap: 4px; font: 500 10px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+	.line-head .r { text-align: right; }
+	.switches { display: grid; gap: 6px; }
+	.switches .srow { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+	.switches .srow .sub { margin-left: auto; font: 500 11px var(--mono); color: var(--ink-3); }
+	.issuer-note { margin: 0; padding: 7px 10px; border-radius: var(--r2); background: color-mix(in srgb, var(--accent) 9%, transparent); font-size: 12px; color: var(--ink-2); }
+	.readlines { display: grid; gap: 2px; }
+	.readlines .rl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; font-size: 12px; padding: 4px 0; border-bottom: 1px dashed var(--line); }
+	.readlines .rl .q { font: 500 11px var(--mono); color: var(--ink-3); }
+	.readlines .rl b { font: 500 12px var(--mono); font-weight: 500; }
+
+	@media (max-width: 1100px) { .quotesp { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; } }
+	@media (max-width: 720px) {
+		.quote-tbl, .quote-tbl.global { --cols: 96px minmax(0, 1fr) 96px; }
+		.quote-tbl .c-hide { display: none; }
+	}
+	.issuer-note .btn { margin-left: 6px; }
+	.fcard .line textarea { font: 500 12px var(--ui); text-transform: none; letter-spacing: 0; }
+	.fcard .line input { text-transform: none; letter-spacing: 0; }
+}

@@ -1,0 +1,60 @@
+/* Data (/data) — Table + Inspector 340. Every set of records grouped by
+   module, and the inspector that says what one file holds. The one instrument is the column strip: an LCD of the
+   set's columns — lit = in the file, dashed and struck = left out. */
+@scope (html) to (.legacy) {
+	.datap { --insp-w: min(var(--size-insp-data, 340px), 50vw); grid-template-columns: minmax(0, 1fr) var(--insp-w); grid-template-areas: "main insp"; }
+	.datap .list-pane { grid-area: main; }
+	.datap .pane-head .hud-label { flex: none; }
+	.datap .pane-head .dim { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+	/* toolbar: scope · filter · hits · Everything */
+	.datap .toolbar .scope { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font: 500 10px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+	.datap .toolbar .scope select { max-width: 190px; min-width: 0; text-transform: none; letter-spacing: 0; font: 500 11.5px var(--ui); color: var(--ink); }
+	.datap .toolbar input[type="search"] { width: 160px; }
+
+	/* the table: set (label + table) · rows · last change · files; the name button stretches over its row */
+	.data-tbl { --cols: minmax(0, 1fr) 72px 60px 110px; }
+	.data-tbl .nm { position: static; display: flex; align-items: center; gap: 8px; align-self: stretch; min-height: 30px; padding: 0; border: 0; border-radius: 0; text-align: left; }
+	.data-tbl .nm::after { content: ""; position: absolute; inset: 0; }
+	.data-tbl .nm:focus-visible { outline: none; }
+	.data-tbl .nm:focus-visible::after { outline: 2px solid var(--focus); outline-offset: -2px; }
+	.data-tbl .nm .lb { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.data-tbl .nm .tb { flex: none; font: 500 10.5px var(--mono); color: var(--ink-3); }
+	.data-tbl .last { font: 500 10.5px var(--mono); color: var(--ink-3); text-align: right; }
+	.data-tbl .files { position: relative; z-index: 1; display: flex; gap: 4px; justify-content: flex-end; }
+	.data-tbl .files .btn { height: 22px; padding: 0 7px; font-size: 11px; }
+	.data-tbl .tbl-row.nobp .lb { color: var(--ink-3); }
+	.data-tbl .state-word.off { color: var(--ink-4); }
+
+	/* a group head inside the table: glyph · module · how many sets and rows */
+	.data-grp { display: flex; align-items: center; gap: 8px; min-height: 26px; padding: 0 10px; border-bottom: 1px solid var(--line); background: var(--panel-head); }
+	.data-grp .g { width: 14px; flex: none; text-align: center; color: var(--ink-3); font-size: 12px; }
+	.data-grp .dim { margin-left: auto; font: 500 10.5px var(--mono); color: var(--ink-3); white-space: nowrap; }
+	.data-never { margin: 0; padding: 12px 12px 16px; font-size: 11.5px; line-height: 1.5; color: var(--ink-3); }
+
+	/* inspector */
+	.datap .inspector .pane-head .hud-label span[aria-hidden] { color: var(--ink-3); }
+	.datap .dev-read .readout .big { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+	.datap .insp-about { margin: 0; font-size: 12.5px; color: var(--ink-2); }
+	.datap .insp-hint { margin: 0; font-size: 11px; line-height: 1.45; color: var(--ink-3); }
+	.datap .left-out { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: 11.5px; color: var(--ink-2); }
+	.datap .left-out code { font: 500 11px var(--mono); color: var(--ink); }
+
+	/* the column strip — the page's one instrument */
+	.colstrip { display: grid; gap: 6px; margin: 0; padding: 8px; border-radius: var(--r2); background: var(--lcd); background-image: var(--scan); box-shadow: inset 0 0 0 1px var(--lcd-line); color: var(--lcd-ink); }
+	.colstrip .hd { display: flex; justify-content: space-between; gap: 8px; font: 500 10px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--lcd-dim); }
+	.colstrip .hd b { font-weight: 500; color: var(--lcd-ink); }
+	.colstrip .cols { display: flex; flex-wrap: wrap; gap: 3px; }
+	.colstrip .c { font: 500 10.5px/18px var(--mono); padding: 0 5px; border-radius: var(--r1); color: var(--lcd-ink); box-shadow: inset 0 0 0 1px var(--lcd-line); overflow-wrap: anywhere; }
+	.colstrip .c.out { color: var(--lcd-dim); text-decoration: line-through; box-shadow: none; outline: 1px dashed var(--lcd-dim); outline-offset: -1px; }
+
+	@media (max-width: 1100px) { .datap { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; } }
+	@media (max-width: 720px) {
+		.data-tbl { --cols: minmax(0, 1fr) 64px; }
+		.data-tbl .c-hide { display: none; }
+		.data-tbl .nm .tb { display: none; }
+		.data-tbl .tbl-row, .data-tbl .nm { min-height: 44px; }
+		.datap .toolbar .scope select { max-width: 150px; }
+		.datap .toolbar input[type="search"] { width: 120px; min-width: 0; flex: 1 1 100px; }
+	}
+}
